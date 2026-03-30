@@ -3,13 +3,12 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-async function readLog(relPath: string) {
-  const abs = path.join(process.cwd(), relPath);
-  return await readFile(abs, "utf8");
-}
-
 export default async function ProgressPage() {
-  const progress = await readLog("progress.txt");
+  const progressPath = path.join(
+    /* turbopackIgnore: true */ process.cwd(),
+    "progress.txt"
+  );
+  const progress = await readFile(progressPath, "utf8");
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">

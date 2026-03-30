@@ -22,6 +22,19 @@ export interface PublicJobRow {
   overallScore: number | null;
 }
 
+type SupabaseJoined<T> = T | T[] | null;
+
+interface JobsSelectRow {
+  id: string;
+  title: string;
+  external_url: string;
+  status: string;
+  discovered_at: string;
+  company: SupabaseJoined<{ name: string | null }>;
+  source: SupabaseJoined<{ name: string | null }>;
+  score: SupabaseJoined<{ overall_score: number | null }>;
+}
+
 function asOne<T>(value: T | T[] | null | undefined): T | null {
   if (!value) return null;
   return Array.isArray(value) ? (value[0] ?? null) : value;
@@ -71,10 +84,10 @@ export async function getPublicJobs(input: {
     return { ok: false as const, error: result.error.message };
   }
 
-  const rows = (result.data ?? []).map((r: any) => {
-    const company = asOne<{ name?: string }>(r.company);
-    const source = asOne<{ name?: string }>(r.source);
-    const score = asOne<{ overall_score?: number }>(r.score);
+  const rows = ((result.data ?? []) as JobsSelectRow[]).map((r) => {
+    const company = asOne<{ name: string | null }>(r.company);
+    const source = asOne<{ name: string | null }>(r.source);
+    const score = asOne<{ overall_score: number | null }>(r.score);
 
     const overallScore =
       typeof score?.overall_score === "number" ? score.overall_score : null;

@@ -3,13 +3,13 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-async function readDoc(relPath: string) {
-  const abs = path.join(process.cwd(), relPath);
-  return await readFile(abs, "utf8");
-}
-
 export default async function MethodologyPage() {
-  const scoring = await readDoc("docs/SCORING_LOGIC.md");
+  const scoringPath = path.join(
+    /* turbopackIgnore: true */ process.cwd(),
+    "docs",
+    "SCORING_LOGIC.md"
+  );
+  const scoring = await readFile(scoringPath, "utf8");
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">

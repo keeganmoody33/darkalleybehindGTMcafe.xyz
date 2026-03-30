@@ -232,7 +232,8 @@ FILES TOUCHED:
 - progress.txt (updated)
 
 VERIFICATION:
-- Pending: run `npm run lint` and `npm run build`.
+- `npm run lint` (pass)
+- `npm run build` (pass)
 
 KNOWN BUGS:
 - None confirmed (MVP routes only).
