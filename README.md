@@ -75,6 +75,8 @@ npm run dev
 2. Ensure `sources` has an active Lever row with `config.company_slug` (see seed in `supabase/migrations/001_initial_schema.sql`).
 3. Open [`/ops/scan`](http://localhost:3000/ops/scan) (not linked in the public nav), enter the secret, and run the scan. New jobs are scored on insert and appear on [`/jobs`](http://localhost:3000/jobs) and [`/dashboard`](http://localhost:3000/dashboard) (tactical + radar modes).
 
+**Scheduled scans (production):** Vercel Cron calls [`/api/cron/ingest`](https://darkalleybehindthegtmcafe.xyz/api/cron/ingest) once daily at **08:00 UTC** (see [`vercel.json`](vercel.json)). Set `CRON_SECRET` in Vercel to match; Vercel sends `Authorization: Bearer <CRON_SECRET>`. On Pro you can shorten the interval in `vercel.json` (Hobby allows at most once per day per cron).
+
 ### Command center
 
 - [`/dashboard`](http://localhost:3000/dashboard): tactical table with filters, detail drawer (status + notes), and radar view with intel panel and event log. Linked from the top nav as **Dashboard**.
@@ -92,6 +94,7 @@ npm run dev
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | From Supabase |
    | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; required for `/ops/scan` ingestion and dashboard mutations |
    | `OPS_SCAN_SECRET` | Long random string; gates `/ops/scan` |
+   | `CRON_SECRET` | Long random string; Vercel Cron sends this as `Authorization: Bearer …` for `/api/cron/ingest` |
 
 4. **Custom domain**: Project → **Domains** → add `darkalleybehindthegtmcafe.xyz` and `www.darkalleybehindthegtmcafe.xyz`. Copy the **exact DNS records** Vercel shows into your DNS provider (Namecheap: A `@` → `76.76.21.21`, CNAME `www` → `cname.vercel-dns.com`) and wait for propagation.
 5. **CLI** (optional): run `vercel login`, then from the repo root `vercel link` and `vercel deploy --prod`.

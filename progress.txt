@@ -405,3 +405,33 @@ KNOWN BUGS:
 
 NOTES:
 - Vercel Production must keep `NEXT_PUBLIC_SITE_URL=https://darkalleybehindthegtmcafe.xyz` for correct `metadataBase`.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Recurring Lever ingestion via Vercel Cron.
+
+COMPLETED THIS SESSION:
+- Added `GET /api/cron/ingest`: verifies `Authorization: Bearer ${CRON_SECRET}`, optional `?sourceId=`, calls `runLeverScan` (same pipeline as `/ops/scan`).
+- Root `vercel.json`: cron `0 8 * * *` (daily 08:00 UTC; Hobby-compatible once-per-day minimum).
+- `.env.example`, README (ops + production env table), `docs/DATA_FLOW.md` updated.
+
+IN PROGRESS:
+- None.
+
+NEXT:
+- User: add `CRON_SECRET` to Vercel Production (and redeploy). Optional: tighten schedule on Pro in `vercel.json`.
+
+BLOCKERS / QUESTIONS:
+- None.
+
+FILES TOUCHED:
+- src/app/api/cron/ingest/route.ts (new)
+- vercel.json (new)
+- .env.example, README.md, docs/DATA_FLOW.md, docs/TECH_STACK.md, progress.txt
+
+VERIFICATION:
+- `npm run build` (pass)
+
+NOTES:
+- Cron runs on **production** deployments only. Local test: `curl -sS -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron/ingest"`.

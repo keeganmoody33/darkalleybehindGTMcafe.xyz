@@ -10,7 +10,7 @@
 | Component library | shadcn/ui | latest | Accessible primitives for tactical mode (tables, drawers, filters, buttons) |
 | Database | Supabase Postgres | hosted | Relational model for jobs/companies/scans/scores; realtime subscriptions available |
 | ORM / query | Supabase JS client (`@supabase/supabase-js`) | latest | Direct Postgres access, RLS, realtime |
-| Deployment | Vercel | — | Zero-config Next.js hosting, cron jobs, edge functions |
+| Deployment | Vercel | — | Zero-config Next.js hosting; Cron via `vercel.json` → `/api/cron/ingest` |
 | Radar/sonar UI | Custom SVG + React | — | No off-the-shelf charting lib fits; hand-built for semantic meaning |
 | Icons | Lucide React | latest | Available; inline SVG also used in places |
 | Font | Geist Sans + Geist Mono (`next/font/google`) | — | Loaded in root layout; interface + code/metrics |
@@ -26,7 +26,6 @@
 | Technology | Purpose | When |
 |---|---|---|
 | Supabase Auth | Login for hosted mode | When hosted admin boundary ships |
-| Vercel Cron Jobs | Scheduled ingestion scans | Automation phase |
 | Supabase Realtime | Live updates when new jobs land | After dashboard stabilizes |
 
 ## Constraints
