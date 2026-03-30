@@ -69,6 +69,31 @@ npm install
 npm run dev
 ```
 
+### Ops: Lever scan (ingestion)
+
+1. Set `SUPABASE_SERVICE_ROLE_KEY` (writes require the service role) and `OPS_SCAN_SECRET` in `.env.local`.
+2. Ensure `sources` has an active Lever row with `config.company_slug` (see seed in `supabase/migrations/001_initial_schema.sql`).
+3. Open [`/ops/scan`](http://localhost:3000/ops/scan) (not linked in the public nav), enter the secret, and run the scan. New jobs appear on `/jobs`.
+
+## Production (Vercel + darkalleybehindgtmcafe.xyz)
+
+1. **Push this repo** to GitHub (or GitLab / Bitbucket).
+2. In [Vercel](https://vercel.com): **Add New Project** → import the repo → Framework Preset **Next.js** → **Deploy** (default build: `next build`, output: Next.js).
+3. **Environment variables** (Project → Settings → Environment Variables), for **Production** (and Preview if you want previews to work against Supabase):
+
+   | Name | Notes |
+   |---|---|
+   | `NEXT_PUBLIC_SITE_URL` | `https://darkalleybehindgtmcafe.xyz` |
+   | `NEXT_PUBLIC_SUPABASE_URL` | From Supabase project settings |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | From Supabase |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; required for `/ops/scan` ingestion |
+   | `OPS_SCAN_SECRET` | Long random string; gates `/ops/scan` |
+
+4. **Custom domain**: Project → **Domains** → add `darkalleybehindgtmcafe.xyz` (and `www.darkalleybehindgtmcafe.xyz` if you use it). Copy the **exact DNS records** Vercel shows into your DNS provider and wait for propagation.
+5. **CLI** (optional): run `vercel login`, then from the repo root `vercel link` and `vercel deploy --prod`.
+
+After DNS propagates, the site should load at **https://darkalleybehindgtmcafe.xyz**.
+
 ## Current phase
 
-Phase 0 — Project foundation (docs, rules, logging). See `progress.txt` for latest status.
+Phase 1–2 — Next.js + Supabase scaffold, public read-only routes, and **ops-gated** Lever ingestion (`/ops/scan`). See `progress.txt` for the latest status.

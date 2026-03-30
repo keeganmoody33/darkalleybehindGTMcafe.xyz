@@ -240,3 +240,125 @@ KNOWN BUGS:
 
 NOTES:
 - All public pages are implemented as server components; no browser Supabase client usage.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Run dev locally; iterate on Phase 1 (fix Turbopack root, home env parity, README).
+
+CURRENT PHASE:
+Phase 1 — Public read-only surface + stability
+
+COMPLETED THIS SESSION:
+- Fixed dev/build Turbopack workspace root: parent `~/package-lock.json` caused Next to infer `/Users/keeganmoody` as root; set `turbopack.root` to this repo via `import.meta.url` (absolute project path).
+- Aligned home page `hasEnv` with `supabaseServer` (anon key counts as configured for read smoke test).
+- Updated README "Current phase" to Phase 1.
+
+IN PROGRESS:
+- None.
+
+NEXT:
+- Continue Phase 2 planning or admin/auth slice per IMPLEMENTATION_PLAN.
+- Optional: remove or relocate stray `~/package-lock.json` if unintended, to reduce multi-root confusion globally.
+
+BLOCKERS / QUESTIONS:
+- None.
+
+FILES TOUCHED:
+- next.config.ts (updated)
+- src/app/page.tsx (updated)
+- README.md (updated)
+- progress.txt (updated)
+
+VERIFICATION:
+- `npm run lint` (pass)
+- `npm run build` (pass; no multi-lockfile / turbopack root warning)
+
+KNOWN BUGS:
+- None confirmed.
+
+NOTES:
+- `npm run dev` should load CSS correctly after turbopack root fix.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Phase 2 — Lever ingestion pipeline (normalize, dedupe, runner) + ops-gated scan trigger.
+
+CURRENT PHASE:
+Phase 2 — Ingestion foundation (Lever)
+
+COMPLETED THIS SESSION:
+- Added `deduper.ts` (`dedupe_key` per BACKEND_STRUCTURE), `normalizer.ts` (Lever → `NormalizedJob`), `runner.ts` (fetch → company upsert → job insert with duplicate detection).
+- Added `supabaseIngest.ts` — ingestion uses **service role only** (throws if missing).
+- Updated Lever fetcher config to accept `company_slug` (matches DB seed) or `company` alias.
+- Added server action `triggerScanAction` + `/ops/scan` page (secret + optional source UUID); `robots` noindex.
+- Documented in README, `.env.example`, `docs/COMPONENT_MAP.md`.
+
+IN PROGRESS:
+- None.
+
+NEXT:
+- Add RLS policies + Supabase Auth for admin; rotate away from shared `OPS_SCAN_SECRET` when auth ships.
+- Phase 2.2: scoring stub or real scorer after stable ingest.
+
+BLOCKERS / QUESTIONS:
+- None.
+
+FILES TOUCHED:
+- src/lib/db/supabaseIngest.ts (new)
+- src/lib/ingestion/deduper.ts (new)
+- src/lib/ingestion/normalizer.ts (new)
+- src/lib/ingestion/runner.ts (new)
+- src/lib/ingestion/fetchers/lever.ts (updated)
+- src/app/actions/triggerScan.action.ts (new)
+- src/app/ops/scan/page.tsx (new)
+- src/app/ops/scan/ScanTriggerForm.tsx (new)
+- .env.example (updated)
+- README.md (updated)
+- docs/COMPONENT_MAP.md (updated)
+- progress.txt (updated)
+
+VERIFICATION:
+- `npm run lint` (pass)
+- `npm run build` (pass)
+
+KNOWN BUGS:
+- None confirmed.
+
+NOTES:
+- Visit `/ops/scan` only after setting `OPS_SCAN_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Production go-live prep for darkalleybehindgtmcafe.xyz (Vercel).
+
+COMPLETED THIS SESSION:
+- Set `metadataBase` in root layout from `NEXT_PUBLIC_SITE_URL` or `VERCEL_URL` for correct absolute metadata on deploy.
+- Documented Vercel + custom domain + required env vars in README; added `NEXT_PUBLIC_SITE_URL` to `.env.example`.
+
+IN PROGRESS:
+- None (deploy requires user Vercel login / Git import).
+
+NEXT:
+- User: import repo in Vercel, set env vars, add domain `darkalleybehindgtmcafe.xyz`, run `vercel login` locally if using CLI.
+
+BLOCKERS / QUESTIONS:
+- Local `vercel deploy --prod` failed: invalid CLI token (needs `vercel login`).
+
+FILES TOUCHED:
+- src/app/layout.tsx (updated)
+- .env.example (updated)
+- README.md (updated)
+- progress.txt (updated)
+
+VERIFICATION:
+- `npm run lint` (pass)
+- `npm run build` (pass)
+
+KNOWN BUGS:
+- None.
+
+NOTES:
+- Set `NEXT_PUBLIC_SITE_URL=https://darkalleybehindgtmcafe.xyz` in Vercel Production env for canonical metadata.

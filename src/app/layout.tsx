@@ -13,7 +13,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+function metadataBase(): URL | undefined {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL);
+  }
+  if (process.env.VERCEL_URL) {
+    return new URL(`https://${process.env.VERCEL_URL}`);
+  }
+  return undefined;
+}
+
 export const metadata: Metadata = {
+  metadataBase: metadataBase(),
   title: "GTM Sonar OS",
   description:
     "Private operating system for finding and tracking founding go-to-market opportunities.",
