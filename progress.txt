@@ -332,7 +332,7 @@ NOTES:
 ---
 
 DATE: 2026-03-30
-SESSION GOAL: Production go-live prep for darkalleybehindgtmcafe.xyz (Vercel).
+SESSION GOAL: Production go-live prep for darkalleybehindthegtmcafe.xyz (Vercel).
 
 COMPLETED THIS SESSION:
 - Set `metadataBase` in root layout from `NEXT_PUBLIC_SITE_URL` or `VERCEL_URL` for correct absolute metadata on deploy.
@@ -342,7 +342,7 @@ IN PROGRESS:
 - None (deploy requires user Vercel login / Git import).
 
 NEXT:
-- User: import repo in Vercel, set env vars, add domain `darkalleybehindgtmcafe.xyz`, run `vercel login` locally if using CLI.
+- User: import repo in Vercel, set env vars, add domain `darkalleybehindthegtmcafe.xyz`, run `vercel login` locally if using CLI.
 
 BLOCKERS / QUESTIONS:
 - Local `vercel deploy --prod` failed: invalid CLI token (needs `vercel login`).
@@ -361,4 +361,47 @@ KNOWN BUGS:
 - None.
 
 NOTES:
-- Set `NEXT_PUBLIC_SITE_URL=https://darkalleybehindgtmcafe.xyz` in Vercel Production env for canonical metadata.
+- Set `NEXT_PUBLIC_SITE_URL=https://darkalleybehindthegtmcafe.xyz` in Vercel Production env for canonical metadata.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Documentation refresh + canonical URL alignment; verify production hostname.
+
+COMPLETED THIS SESSION:
+- Corrected production domain everywhere docs/examples referenced it: **darkalleybehindthegtmcafe.xyz** (apex; www redirects in Vercel). Replaced mistaken `darkalleybehindgtmcafe.xyz` (missing `the`) in README, `.env.example`, and prior progress entry.
+- README: current phase (Phases 1–3 + dashboard + radar), `/dashboard` + ops scan scoring note, GitHub → Vercel, Namecheap DNS recap, `NEXT_PUBLIC_SITE_URL` guidance.
+- `docs/COMPONENT_MAP.md`: dashboard, tactical, radar components; PublicTopNav + OpsScan updates; planned table trimmed to real gaps.
+- `docs/IMPLEMENTATION_PLAN.md`: Phase 1–3 acceptance checkboxes; noise/prestigeTrap file split; Phases 4–5 shipped section; future phase table renumbered (6–9).
+- `docs/DATA_FLOW.md`: consumers `/jobs` + `/dashboard`; `updateStatus.action.ts`, `addNote.action.ts`.
+- `docs/TECH_STACK.md`: Geist via `next/font` in Decided; cleaned Planned table.
+- `docs/ADR.md`: ADR-008 scoring module layout (noise + prestigeTrap files).
+
+PRODUCT CONTEXT (recent ship, cross-reference):
+- Five-dimension scorer + ingest integration; `/dashboard` tactical + radar; server actions for status and notes; commit `2aa61a1` (feat: scoring engine, dashboard, Lever ingest).
+
+IN PROGRESS:
+- None.
+
+NEXT:
+- Manually spot-check scoring vs `SCORING_LOGIC.md` on 5+ real jobs when data allows.
+- Implement Supabase Auth + RLS before treating dashboard mutations as production-safe for multi-user.
+
+BLOCKERS / QUESTIONS:
+- None.
+
+FILES TOUCHED:
+- README.md, .env.example, progress.txt
+- docs/COMPONENT_MAP.md, docs/IMPLEMENTATION_PLAN.md, docs/DATA_FLOW.md, docs/TECH_STACK.md, docs/ADR.md
+
+VERIFICATION:
+- `curl -sI https://darkalleybehindthegtmcafe.xyz`: HTTP/2 200, `server: Vercel`, HSTS present.
+- `dig +short darkalleybehindthegtmcafe.xyz A`: `76.76.21.21`.
+- `curl -sI https://www.darkalleybehindthegtmcafe.xyz`: HTTP/2 307 → `location: https://darkalleybehindthegtmcafe.xyz/`.
+- Key routes (curl status): `/` 200, `/jobs` 200, `/methodology` 200, `/progress` 200. `/dashboard` returned **404** on production at check time—likely Vercel still on a pre-dashboard deployment; **push `main` and redeploy** (or promote latest deployment) so `/dashboard` matches this repo.
+
+KNOWN BUGS:
+- None from documentation work.
+
+NOTES:
+- Vercel Production must keep `NEXT_PUBLIC_SITE_URL=https://darkalleybehindthegtmcafe.xyz` for correct `metadataBase`.

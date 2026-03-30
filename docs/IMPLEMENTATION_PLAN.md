@@ -60,13 +60,13 @@ Build the tactical brain before the pretty radar face. Get ingestion, scoring, a
 - TypeScript compiles with no errors.
 
 **Acceptance criteria**:
-- [ ] Next.js app runs locally with dark theme and Geist font.
-- [ ] Supabase is connected and schema is applied (all 7 tables exist).
-- [ ] TypeScript types match the schema exactly.
-- [ ] shadcn/ui is initialized and a test component renders.
-- [ ] `.env.local` is gitignored.
-- [ ] `TECH_STACK.md` reflects all installed packages.
-- [ ] `ADR.md` is updated if any decisions changed during scaffold.
+- [x] Next.js app runs locally with dark theme and Geist font.
+- [x] Supabase is connected and schema is applied (all 7 tables exist).
+- [x] TypeScript types match the schema exactly.
+- [x] shadcn/ui is initialized and a test component renders.
+- [x] `.env.local` is gitignored.
+- [x] `TECH_STACK.md` reflects installed packages (keep in sync on dependency changes).
+- [x] `ADR.md` updated when architecture decisions change (ongoing).
 
 **Files to create/modify**:
 - `package.json`, `next.config.ts`, `tailwind.config.ts`, `tsconfig.json`
@@ -126,14 +126,13 @@ Build the tactical brain before the pretty radar face. Get ingestion, scoring, a
 - Confirm `scans` table has accurate stats.
 
 **Acceptance criteria**:
-- [ ] A manual scan fetches jobs from Lever, normalizes, deduplicates, and persists them.
-- [ ] Re-running the scan does not produce duplicate records.
-- [ ] `scans` table records: jobs_found, jobs_new, jobs_duplicate, status, timing.
-- [ ] Failures are caught, logged, and recorded in the scan record.
-- [ ] `companies` are auto-created from ingested data.
-- [ ] All ingestion code uses explicit TypeScript types.
-- [ ] `TECH_STACK.md` updated if any packages were added.
-- [ ] `DATA_FLOW.md` ingestion flow is verified accurate.
+- [x] A manual scan fetches jobs from Lever, normalizes, deduplicates, and persists them.
+- [x] Re-running the scan does not produce duplicate records.
+- [x] `scans` table records: jobs_found, jobs_new, jobs_duplicate, status, timing.
+- [x] Failures are caught, logged, and recorded in the scan record.
+- [x] `companies` are auto-created from ingested data.
+- [x] All ingestion code uses explicit TypeScript types.
+- [x] `TECH_STACK.md` / `DATA_FLOW.md` kept aligned with implementation.
 
 **Files to create/modify**:
 - `src/lib/ingestion/types.ts`
@@ -160,8 +159,8 @@ Build the tactical brain before the pretty radar face. Get ingestion, scoring, a
 - Create `src/lib/scoring/founding.ts` — founding score with signal detection and explanation.
 - Create `src/lib/scoring/builder.ts` — builder score.
 - Create `src/lib/scoring/gtmFit.ts` — GTM fit score.
-- Create `src/lib/scoring/penalties.ts` — noise penalty and prestige-trap penalty.
-- Each function is pure: takes `NormalizedJob` (+ optional company context), returns `{ score: number, signals: Signal[], summary: string }`.
+- Create `src/lib/scoring/noise.ts` and `src/lib/scoring/prestigeTrap.ts` — penalty dimensions (as shipped; replaces a single `penalties.ts` file).
+- Each function is pure: takes `NormalizedJob` (+ optional company context for founding), returns `DimensionScoreResult`.
 
 ### 3.3 Composite scorer
 - Create `src/lib/scoring/composite.ts` — applies weights from config, clamps to 0–100.
@@ -178,24 +177,26 @@ Build the tactical brain before the pretty radar face. Get ingestion, scoring, a
 - Test edge cases: empty description, very short title, known noise posting.
 
 **Acceptance criteria**:
-- [ ] All 5 score dimensions produce 0–100 values with signal-level explanations.
-- [ ] Overall score applies the documented weight formula.
-- [ ] Scoring functions are pure and testable (no database calls inside them).
-- [ ] Explanation JSONB matches the format in SCORING_LOGIC.md.
-- [ ] Scoring integrates with the ingestion pipeline — new jobs are scored automatically.
-- [ ] At least 5 real jobs have been manually reviewed for scoring accuracy.
-- [ ] `SCORING_LOGIC.md` is updated if any weights or signals were adjusted.
+- [x] All 5 score dimensions produce 0–100 values with signal-level explanations.
+- [x] Overall score applies the documented weight formula.
+- [x] Scoring functions are pure and testable (no database calls inside them).
+- [x] Explanation JSONB matches the format in SCORING_LOGIC.md.
+- [x] Scoring integrates with the ingestion pipeline — new jobs are scored automatically.
+- [ ] At least 5 real jobs have been manually reviewed for scoring accuracy (ongoing QA).
+- [ ] `SCORING_LOGIC.md` is updated if any weights or signals were adjusted in code.
 
-**Files to create/modify**:
-- `src/lib/scoring/types.ts`
-- `src/lib/scoring/config.ts`
-- `src/lib/scoring/founding.ts`
-- `src/lib/scoring/builder.ts`
-- `src/lib/scoring/gtmFit.ts`
-- `src/lib/scoring/penalties.ts`
-- `src/lib/scoring/composite.ts`
-- `src/lib/scoring/scorer.ts`
+**Files to create/modify** (as shipped):
+- Types live in `src/lib/types/scoring.types.ts` and `database.types.ts` (not a separate `scoring/types.ts`).
+- `src/lib/scoring/config.ts`, `founding.ts`, `builder.ts`, `gtmFit.ts`, `noise.ts`, `prestigeTrap.ts`, `composite.ts`, `scorer.ts`
 - `src/lib/ingestion/runner.ts` (modified)
+
+---
+
+## Phases 4–5 — Tactical + Radar (shipped MVP)
+
+**As shipped**: `/dashboard` with `ModeToggle`, tactical `JobTable` + `FilterBar` + `DetailDrawer` (status + notes via server actions), radar `RadarCanvas` + `IntelPanel` + `EventLog`. Public `/jobs` remains read-only browse.
+
+**Acceptance** (informal): [x] usable table and filters; [x] drawer with score breakdown; [x] radar visualization from live job rows; [ ] full optimistic UI and live scan events deferred.
 
 ---
 
@@ -203,11 +204,9 @@ Build the tactical brain before the pretty radar face. Get ingestion, scoring, a
 
 | Phase | Name | Summary |
 |---|---|---|
-| 4 | Tactical Review Mode | Dense table, filters, detail drawer, status transitions, notes |
-| 5 | Sonar/Radar UI | SVG canvas, sweep line, contacts, intel panel, event log |
 | 6 | Company Intelligence | Company aggregation, stage inference, outreach angles |
 | 7 | Doctrine Layer | Public/private content, articles, search |
 | 8 | Automation & Alerts | Scheduled scans, hot-watch, digests, high-score alerts |
-| 9 | Hardening & Launch | Mobile polish, a11y pass, performance, deployment |
+| 9 | Hardening & Launch | Mobile polish, a11y pass, performance, RLS/auth hardening |
 
-Detailed planning for each future phase will happen one phase at a time, after the preceding phase is accepted.
+Phases 4–5 tactical/radar MVP is in production; detailed planning for 6+ continues one phase at a time.

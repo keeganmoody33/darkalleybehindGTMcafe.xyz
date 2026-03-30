@@ -97,3 +97,12 @@
   - Environment variables must include `NEXT_PUBLIC_SUPABASE_ANON_KEY` (documented in `.env.example`).
 - **Alternatives considered**:
   - Single client with conditional keys: too easy to accidentally bundle privileged secrets.
+
+### ADR-008: Scoring modules as separate dimension files
+
+- **Date**: 2026-03-30
+- **Status**: accepted
+- **Context**: The implementation plan originally referenced a single `penalties.ts` for both noise and prestige-trap dimensions.
+- **Decision**: Implement noise and prestige-trap as `src/lib/scoring/noise.ts` and `src/lib/scoring/prestigeTrap.ts`, plus `config.ts`, `composite.ts`, and `scorer.ts` orchestration. Shared score types remain in `src/lib/types/scoring.types.ts` and `database.types.ts`.
+- **Consequences**: File list in docs must reference the two penalty modules; pure functions stay testable per dimension.
+- **Alternatives considered**: Single `penalties.ts` exporting both — slightly fewer files but longer file and mixed concerns.

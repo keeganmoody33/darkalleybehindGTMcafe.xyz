@@ -46,7 +46,7 @@ Source API → Fetcher → Normalizer → Deduper → Scorer → Database → AP
 - **Source data**: ATS API response (JSON array of job postings).
 - **Transformations**: Raw API shape → `NormalizedJob` (strip HTML, detect remote, parse dates, extract company name) → generate `dedupe_key` → check for existing record → if new, run scoring engine → produce `ScoreResult` with explanations.
 - **Persistence**: INSERT into `jobs` (ON CONFLICT dedupe_key DO NOTHING), INSERT into `scores`, UPSERT `companies` (create if not exists), INSERT `scans` record with stats.
-- **Consumer**: API route `/api/jobs` serves to UI. Sonar mode plots new contacts. Event log shows scan summary.
+- **Consumer**: Public `/jobs` and `/dashboard` read from Supabase (server-side). Radar mode plots contacts; tactical mode lists rows. Event log (dashboard) shows summary-style entries.
 - **Failure modes**: ATS API timeout (retry 2x with backoff), ATS API 404 (mark source as errored), malformed response (log and skip individual records), database constraint violation (log, do not crash scan).
 - **Observability**: `scans` table tracks status, timing, counts, errors. Console logging for dev. Future: structured logs.
 - **Related files**: `src/lib/ingestion/runner.ts`, `src/lib/ingestion/fetchers/*.ts`, `src/lib/ingestion/normalizer.ts`, `src/lib/ingestion/deduper.ts`, `src/lib/scoring/scorer.ts`.
@@ -55,12 +55,12 @@ Source API → Fetcher → Normalizer → Deduper → Scorer → Database → AP
 
 - **Trigger**: User clicks status button in tactical mode or intel panel.
 - **Source data**: `{ jobId, newStatus }` from UI.
-- **Transformations**: Validate status transition (forward-only or → archived). Update `jobs.status`. Insert `status_history` row.
+- **Transformations**: Validate status enum; update `jobs.status`. Insert `status_history` row.
 - **Persistence**: UPDATE `jobs`, INSERT `status_history`.
 - **Consumer**: UI reflects new status immediately (optimistic update, then confirm). Radar blip visual changes per status.
 - **Failure modes**: Invalid transition (reject with message), database error (rollback, show error).
 - **Observability**: `status_history` provides full audit trail.
-- **Related files**: `src/app/actions/updateJobStatus.action.ts`, `JobTable`, `IntelPanel`.
+- **Related files**: `src/app/actions/updateStatus.action.ts`, `JobTable`, `IntelPanel`.
 
 ### Flow: Note creation
 
@@ -71,4 +71,4 @@ Source API → Fetcher → Normalizer → Deduper → Scorer → Database → AP
 - **Consumer**: Notes list in detail drawer / intel panel.
 - **Failure modes**: Empty content (validate client-side), database error.
 - **Observability**: Notes have timestamps for chronological display.
-- **Related files**: `src/app/actions/addJobNote.action.ts`, `DetailDrawer`, `IntelPanel`.
+- **Related files**: `src/app/actions/addNote.action.ts`, `DetailDrawer`, `IntelPanel`.

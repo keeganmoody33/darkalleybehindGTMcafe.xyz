@@ -12,8 +12,8 @@
 | ORM / query | Supabase JS client (`@supabase/supabase-js`) | latest | Direct Postgres access, RLS, realtime |
 | Deployment | Vercel | — | Zero-config Next.js hosting, cron jobs, edge functions |
 | Radar/sonar UI | Custom SVG + React | — | No off-the-shelf charting lib fits; hand-built for semantic meaning |
-| Icons | Lucide React | latest | Consistent, tree-shakable icon set |
-| Font | Geist Sans + Geist Mono | — | Interface text + code/metrics |
+| Icons | Lucide React | latest | Available; inline SVG also used in places |
+| Font | Geist Sans + Geist Mono (`next/font/google`) | — | Loaded in root layout; interface + code/metrics |
 
 ## Hybrid Posture
 
@@ -25,10 +25,9 @@
 
 | Technology | Purpose | When |
 |---|---|---|
-| Supabase Auth | Login for hosted mode | When hosted mode ships |
-| Vercel Cron Jobs | Scheduled ingestion scans | Phase 9 (automation layer) |
-| Supabase Realtime | Live updates when new jobs land | After tactical MVP is stable |
-| `next/font` (Geist) | Font optimization | Phase 5 (tactical MVP) |
+| Supabase Auth | Login for hosted mode | When hosted admin boundary ships |
+| Vercel Cron Jobs | Scheduled ingestion scans | Automation phase |
+| Supabase Realtime | Live updates when new jobs land | After dashboard stabilizes |
 
 ## Constraints
 

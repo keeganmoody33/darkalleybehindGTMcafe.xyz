@@ -73,27 +73,33 @@ npm run dev
 
 1. Set `SUPABASE_SERVICE_ROLE_KEY` (writes require the service role) and `OPS_SCAN_SECRET` in `.env.local`.
 2. Ensure `sources` has an active Lever row with `config.company_slug` (see seed in `supabase/migrations/001_initial_schema.sql`).
-3. Open [`/ops/scan`](http://localhost:3000/ops/scan) (not linked in the public nav), enter the secret, and run the scan. New jobs appear on `/jobs`.
+3. Open [`/ops/scan`](http://localhost:3000/ops/scan) (not linked in the public nav), enter the secret, and run the scan. New jobs are scored on insert and appear on [`/jobs`](http://localhost:3000/jobs) and [`/dashboard`](http://localhost:3000/dashboard) (tactical + radar modes).
 
-## Production (Vercel + darkalleybehindgtmcafe.xyz)
+### Command center
 
-1. **Push this repo** to GitHub (or GitLab / Bitbucket).
-2. In [Vercel](https://vercel.com): **Add New Project** → import the repo → Framework Preset **Next.js** → **Deploy** (default build: `next build`, output: Next.js).
-3. **Environment variables** (Project → Settings → Environment Variables), for **Production** (and Preview if you want previews to work against Supabase):
+- [`/dashboard`](http://localhost:3000/dashboard): tactical table with filters, detail drawer (status + notes), and radar view with intel panel and event log. Linked from the top nav as **Dashboard**.
+
+## Production (Vercel + darkalleybehindthegtmcafe.xyz)
+
+1. **Repo**: [keeganmoody33/darkalleybehindGTMcafe.xyz](https://github.com/keeganmoody33/darkalleybehindGTMcafe.xyz) is connected to Vercel; pushes to `main` trigger production deploys.
+2. In [Vercel](https://vercel.com): project settings should use Framework Preset **Next.js** (default build: `next build`).
+3. **Environment variables** (Project → Settings → Environment Variables), for **Production** (and Preview if previews should hit Supabase):
 
    | Name | Notes |
    |---|---|
-   | `NEXT_PUBLIC_SITE_URL` | `https://darkalleybehindgtmcafe.xyz` |
+   | `NEXT_PUBLIC_SITE_URL` | `https://darkalleybehindthegtmcafe.xyz` (must match apex for `metadataBase` / OG URLs) |
    | `NEXT_PUBLIC_SUPABASE_URL` | From Supabase project settings |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | From Supabase |
-   | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; required for `/ops/scan` ingestion |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; required for `/ops/scan` ingestion and dashboard mutations |
    | `OPS_SCAN_SECRET` | Long random string; gates `/ops/scan` |
 
-4. **Custom domain**: Project → **Domains** → add `darkalleybehindgtmcafe.xyz` (and `www.darkalleybehindgtmcafe.xyz` if you use it). Copy the **exact DNS records** Vercel shows into your DNS provider and wait for propagation.
+4. **Custom domain**: Project → **Domains** → add `darkalleybehindthegtmcafe.xyz` and `www.darkalleybehindthegtmcafe.xyz`. Copy the **exact DNS records** Vercel shows into your DNS provider (Namecheap: A `@` → `76.76.21.21`, CNAME `www` → `cname.vercel-dns.com`) and wait for propagation.
 5. **CLI** (optional): run `vercel login`, then from the repo root `vercel link` and `vercel deploy --prod`.
 
-After DNS propagates, the site should load at **https://darkalleybehindgtmcafe.xyz**.
+After DNS propagates, the site loads at **https://darkalleybehindthegtmcafe.xyz** (www redirects to apex if configured in Vercel).
+
+If a new route (for example `/dashboard`) returns **404** in production but works locally, the Vercel deployment is probably behind `main`: push the latest commit and wait for the production build, or trigger a redeploy from the Vercel dashboard.
 
 ## Current phase
 
-Phase 1–2 — Next.js + Supabase scaffold, public read-only routes, and **ops-gated** Lever ingestion (`/ops/scan`). See `progress.txt` for the latest status.
+Phases 1–3 plus tactical dashboard and radar UI are shipped: scoring engine, `/dashboard`, ingestion with auto-score on new jobs, public `/jobs`. Next focus: auth/RLS, company intelligence, automation. See `progress.txt` and `docs/IMPLEMENTATION_PLAN.md`.
