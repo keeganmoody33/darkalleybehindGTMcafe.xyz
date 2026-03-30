@@ -1,0 +1,70 @@
+DATE: 2026-03-30
+SESSION GOAL: Project initialization — create canonical docs, rules, and logging system (Phase 0).
+
+CURRENT PHASE:
+Phase 0 — Project foundation
+
+COMPLETED THIS SESSION:
+- Created /docs directory with all canonical documents:
+  PRD.md, APP_FLOW.md, TECH_STACK.md, FRONTEND_GUIDELINES.md,
+  BACKEND_STRUCTURE.md, SCORING_LOGIC.md, INGESTION_SOURCES.md,
+  VISUAL_LANGUAGE_MAP.md, INSPIRATION_LOG.md, ADR.md,
+  COMPONENT_MAP.md, DATA_FLOW.md, QA_CHECKLIST.md
+- Created .cursor/rules/ with core-rules, product-rules, design-rules,
+  engineering-rules, logging-rules
+- Created progress.txt and lessons.md logging templates
+- Created README.md
+- Resolved critical v1 unknowns and encoded decisions in docs:
+  - Stack: Next.js App Router + Supabase Postgres + Vercel
+  - Posture: hybrid (local dev + hosted deploy)
+  - Scoring: rule-based v1, AI-assisted v2
+  - ATS sources: Lever (primary), Greenhouse (secondary), Ashby (tertiary)
+  - UI framework: shadcn/ui for tactical, custom SVG for radar
+- Wrote 5 initial ADR entries (framework, database, scoring approach, UI library, hybrid posture)
+- Wrote 2 initial inspiration log entries (military sonar CRT, Linear app)
+- Created IMPLEMENTATION_PLAN.md with phased milestones and acceptance criteria
+
+IN PROGRESS:
+- Nothing — Phase 0 is complete, awaiting approval to begin Phase 1 implementation.
+
+NEXT:
+- Review and approve docs.
+- Begin Phase 1: scaffold Next.js project, initialize Supabase, apply schema.
+
+BLOCKERS / QUESTIONS:
+- None. All v1 decisions are documented.
+
+FILES TOUCHED:
+- docs/PRD.md (new)
+- docs/APP_FLOW.md (new)
+- docs/TECH_STACK.md (new)
+- docs/FRONTEND_GUIDELINES.md (new)
+- docs/BACKEND_STRUCTURE.md (new)
+- docs/SCORING_LOGIC.md (new)
+- docs/INGESTION_SOURCES.md (new)
+- docs/VISUAL_LANGUAGE_MAP.md (new)
+- docs/INSPIRATION_LOG.md (new)
+- docs/ADR.md (new)
+- docs/COMPONENT_MAP.md (new)
+- docs/DATA_FLOW.md (new)
+- docs/QA_CHECKLIST.md (new)
+- docs/IMPLEMENTATION_PLAN.md (new)
+- .cursor/rules/core-rules.md (new)
+- .cursor/rules/product-rules.md (new)
+- .cursor/rules/design-rules.md (new)
+- .cursor/rules/engineering-rules.md (new)
+- .cursor/rules/logging-rules.md (new)
+- progress.txt (new)
+- lessons.md (new)
+- README.md (new)
+
+VERIFICATION:
+- All files listed in discovery.txt exist with substantive content.
+- Rules match the guardrails specified in discovery.txt.
+- Logging templates match the formats specified in discovery.txt.
+
+KNOWN BUGS:
+- None (no code yet).
+
+NOTES:
+- The darkalley-cursor/ subfolder contains an older prototype. It is not part of the v1 build but may be referenced for inspiration.

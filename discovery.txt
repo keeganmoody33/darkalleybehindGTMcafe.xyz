@@ -1,0 +1,582 @@
+I’m turning this into a build kit you can paste straight into Cursor: first-session prompt, recurring rules, progress logging system, and a principal-engineer-style implementation backlog.
+
+I’m optimizing for one thing: keeping the project from drifting while you build the cinematic sonar UI and the actual job-intel engine underneath it.
+
+Thought for 2m 11s
+
+Start with this in Cursor.
+
+Use Plan / Ask mode first, not Agent mode.
+
+You are my principal software engineer, staff product architect, and implementation partner for a new project.
+
+Project name: GTM Sonar OS
+
+Mission:
+Build a private-first operating system for finding and tracking founding go-to-market opportunities. The product continuously ingests jobs from ATS systems and selected startup/job sources, normalizes and deduplicates them, scores them for founding/builder/GTM fit, and presents them in a cinematic sonar-style interface with a tactical productivity mode underneath it.
+
+Core product goals:
+1. Find founding / builder-heavy GTM roles quickly.
+2. Score them intelligently, not just list them.
+3. Track my status: new, reviewed, applied, outreach sent, archived, etc.
+4. Generate useful context: why this role matches, likely pain, outreach angle.
+5. Maintain a strong design system with a premium sonar/radar visual language.
+6. Preserve context and project discipline across sessions.
+
+Product concept:
+- Default experience is a radar/sonar command-center UI.
+- Sweep line, pulse rings, plotted contacts, side intel panel, event log.
+- Jobs appear like “contacts” revealed by scans.
+- Every visual effect must encode meaning, not decoration.
+- There must also be a tactical/table/list mode for fast work.
+- Later, the domain may include a public-facing “Doctrine” / article section with my GTM beliefs, frameworks, and proof-of-work.
+
+Current state:
+- Blank folder.
+- We are at project initialization.
+- No code should be written until planning/docs/rules are created and reviewed.
+
+Your operating instructions:
+1. Work in planning mode only first.
+2. Interrogate the idea aggressively and eliminate assumptions.
+3. Do not jump into implementation.
+4. Generate the documentation system first.
+5. Create a phased implementation plan with acceptance criteria.
+6. Favor clarity, explicit decisions, and low-drift execution.
+7. When uncertainty exists, surface it clearly and propose 1–2 good options.
+
+Create this project structure first:
+
+/docs
+  PRD.md
+  APP_FLOW.md
+  TECH_STACK.md
+  FRONTEND_GUIDELINES.md
+  BACKEND_STRUCTURE.md
+  IMPLEMENTATION_PLAN.md
+  SCORING_LOGIC.md
+  INGESTION_SOURCES.md
+  VISUAL_LANGUAGE_MAP.md
+  INSPIRATION_LOG.md
+  COMPONENT_MAP.md
+  DATA_FLOW.md
+  ADR.md
+  QA_CHECKLIST.md
+
+/.cursor/rules
+  core-rules.md
+  product-rules.md
+  design-rules.md
+  engineering-rules.md
+  logging-rules.md
+
+/project files
+  progress.txt
+  lessons.md
+  README.md
+
+Canonical product requirements to reflect in the docs:
+- Private-first app for my own use.
+- Primary target roles: founding GTM engineer, GTME, GTM engineer, founding growth, growth engineer, head of growth, head of GTM, RevOps/systems builder roles, and adjacent titles that imply 0→1 GTM ownership.
+- Scheduled scans should run multiple times per day.
+- Primary v1 sources should focus on structured ATS/job endpoints first.
+- Product must support scoring:
+  - founding score
+  - builder score
+  - GTM fit score
+  - noise / junk penalty
+  - prestige-trap penalty
+  - overall score
+- UI concept:
+  - dark sonar/radar command center
+  - pulse rings and sweep line
+  - perimeter contacts
+  - event log
+  - contact details panel
+  - filters
+  - tactical mode for dense review
+- Public content section is not v1-critical but should be documented for later.
+- We need good support for:
+  - inspiration capture
+  - architecture decisions
+  - component mapping
+  - data flow mapping
+  - progress logging
+  - lessons learned logging
+  - interconnection documentation between ingestion, scoring, and UI systems
+
+Execution sequence:
+A. First, ask me the most important unanswered questions.
+B. Then draft all docs with specific initial content and placeholders only where truly needed.
+C. Then propose the first 3 implementation milestones.
+D. Then stop and wait for approval before writing code.
+
+Important operating constraints:
+- No silent dependency additions.
+- No silent schema changes.
+- No silent design drift.
+- No implementing cool visuals before the data model, ingestion path, and tactical mode are clearly defined.
+- Every animation must have a product meaning.
+- Mobile-first, accessible, and performant.
+- Sound must be optional or easy to mute.
+- Every session must update progress.txt and lessons.md when relevant.
+- Every meaningful architecture decision must go into docs/ADR.md.
+- Every external inspiration reference must go into docs/INSPIRATION_LOG.md with what to borrow and what not to copy.
+
+Start now by interrogating the product idea and identifying the most important unknowns.
+
+Then, after the docs are drafted and you like them, use this:
+
+Proceed to implementation, but only one phase at a time.
+
+Rules:
+1. Read docs/PRD.md, docs/APP_FLOW.md, docs/TECH_STACK.md, docs/FRONTEND_GUIDELINES.md, docs/BACKEND_STRUCTURE.md, docs/IMPLEMENTATION_PLAN.md, progress.txt, and lessons.md before changing code.
+2. Implement only the next approved step from docs/IMPLEMENTATION_PLAN.md.
+3. Before making changes, summarize:
+   - what you are about to build
+   - which files you will touch
+   - which docs govern the work
+4. After implementation, update:
+   - progress.txt
+   - docs/ADR.md if any architectural decision changed
+   - docs/COMPONENT_MAP.md if new components were added
+   - docs/DATA_FLOW.md if data movement changed
+   - lessons.md if a new rule was learned
+5. End each task with:
+   - what was built
+   - how it was verified
+   - any remaining risks
+   - the exact next recommended step
+
+Do not skip logging.
+Do not add dependencies without updating docs/TECH_STACK.md.
+Do not change schema without updating docs/BACKEND_STRUCTURE.md.
+Do not add visual patterns outside docs/FRONTEND_GUIDELINES.md.
+
+Now the recurring guardrails.
+
+Put these into your rules files.
+
+.cursor/rules/core-rules.md
+# Core Rules
+
+- Always read the canonical docs and progress.txt before making changes.
+- Never start with implementation if requirements are ambiguous.
+- Never code before the relevant plan step is identified.
+- Work one approved implementation step at a time.
+- Do not invent requirements, features, dependencies, routes, schema fields, or design patterns.
+- If a change affects architecture, update docs/ADR.md.
+- If a change affects data flow, update docs/DATA_FLOW.md.
+- If a change adds or changes components, update docs/COMPONENT_MAP.md.
+- After every meaningful change, update progress.txt.
+- After every repeated mistake or useful correction, update lessons.md.
+- Be explicit about assumptions. Surface them before acting.
+.cursor/rules/product-rules.md
+# Product Rules
+
+- This product is a decision engine, not a generic job board.
+- The app's purpose is to identify high-fit founding/builder GTM roles and help the user act quickly.
+- A role is more important than its title; signals in the description, company stage, and ownership matter.
+- The product must always preserve two modes:
+  - Cinematic radar mode
+  - Tactical productivity mode
+- Tactical usability beats flashy visuals when there is a conflict.
+- Public-facing content is secondary to the private operating system in v1.
+- Every surfaced role should support clear action states:
+  new, reviewed, shortlisted, applied, outreach sent, interviewing, archived.
+.cursor/rules/design-rules.md
+# Design Rules
+
+- The visual language is sonar/radar command center, not hacker-movie gimmick.
+- Every visual effect must encode meaning.
+- Use restrained motion, not decorative motion.
+- Build the tactical mode before polishing cinematic mode.
+- Sound must be easy to mute and never required for usability.
+- Primary interface principles:
+  - dark premium command console
+  - phosphor/radar energy
+  - strong hierarchy
+  - readable typography
+  - meaningful glow
+  - glass-like panels only if readability remains high
+- Maintain consistency with docs/FRONTEND_GUIDELINES.md and docs/VISUAL_LANGUAGE_MAP.md.
+- Any new visual inspiration must be logged in docs/INSPIRATION_LOG.md.
+.cursor/rules/engineering-rules.md
+# Engineering Rules
+
+- Prefer boring, stable architecture over cleverness.
+- Start with the data model, ingestion path, normalization, deduplication, and scoring before advanced UI.
+- Prefer small, composable components.
+- Prefer pure functions for scoring and normalization logic.
+- Prefer explicit types and interfaces.
+- Prefer testable logic for nontrivial business rules.
+- No silent new packages.
+- No silent new external services.
+- No schema changes without updating docs/BACKEND_STRUCTURE.md.
+- No API contract changes without updating docs/DATA_FLOW.md and relevant docs.
+- Add instrumentation/logging for ingestion jobs and scoring runs.
+.cursor/rules/logging-rules.md
+# Logging Rules
+
+Every work session must:
+1. Read progress.txt first.
+2. Summarize current state before changing code.
+3. Log what was completed.
+4. Log what is currently in progress.
+5. Log what is next.
+6. Log known bugs/blockers.
+7. Log files touched.
+8. Log verification performed.
+
+Every architecture decision must be written to docs/ADR.md.
+
+Every inspiration item must include:
+- source / reference name
+- link or screenshot path
+- what to borrow
+- what not to copy
+- which product area it influences
+- status: observed / adopted / rejected
+
+Every new lesson must include:
+- problem
+- root cause
+- prevention rule
+- affected files / systems
+
+Use these recurring prompts while building.
+
+Session start prompt
+Read progress.txt, lessons.md, and the canonical docs first.
+Summarize:
+1. where the project stands,
+2. the current implementation phase,
+3. the next highest-leverage task,
+4. any risks or unresolved decisions.
+Do not code yet.
+Before any feature prompt
+We are implementing the next approved step from docs/IMPLEMENTATION_PLAN.md.
+
+Before touching code:
+1. identify the exact step,
+2. list the files you expect to touch,
+3. list the governing docs,
+4. note any assumptions,
+5. propose a minimal implementation path.
+
+Wait for my confirmation if the assumptions are material.
+After any feature prompt
+Update:
+- progress.txt
+- docs/COMPONENT_MAP.md if needed
+- docs/DATA_FLOW.md if needed
+- docs/ADR.md if needed
+- lessons.md if needed
+
+Then summarize:
+- what was built
+- what was verified
+- what still needs work
+- the next recommended step
+UI inspiration capture prompt
+I am giving you a design reference.
+
+Add it to docs/INSPIRATION_LOG.md with:
+- source name
+- link or screenshot file path
+- product area affected
+- what to borrow
+- what to avoid copying
+- how to adapt it to the sonar/radar design system
+- whether it influences layout, motion, typography, sound, panels, or interaction
+
+Then tell me which docs should be updated because of this inspiration.
+Refactor prompt
+Before refactoring, read the canonical docs and current implementation.
+Propose:
+1. why the refactor is necessary,
+2. what technical debt it removes,
+3. what risks it introduces,
+4. what files it touches,
+5. how we will verify behavior is unchanged.
+
+Do not refactor until the plan is clear.
+
+Now the logging templates.
+
+progress.txt
+DATE:
+SESSION GOAL:
+
+CURRENT PHASE:
+[example: Phase 3 - Ingestion foundation]
+
+COMPLETED THIS SESSION:
+- 
+
+IN PROGRESS:
+- 
+
+NEXT:
+- 
+
+BLOCKERS / QUESTIONS:
+- 
+
+FILES TOUCHED:
+- 
+
+VERIFICATION:
+- 
+
+KNOWN BUGS:
+- 
+
+NOTES:
+- 
+lessons.md
+# Lessons Learned
+
+## Template
+- Date:
+- Problem:
+- Root cause:
+- Prevention rule:
+- Affected area:
+- Action taken:
+
+---
+
+## Entries
+docs/INSPIRATION_LOG.md
+# Inspiration Log
+
+## Template
+- Date:
+- Reference name:
+- Link / screenshot path:
+- Category: layout / motion / radar / panel / typography / sound / interaction / data-viz
+- What to borrow:
+- What not to copy:
+- How to adapt for GTM Sonar OS:
+- Affected docs/components:
+- Status: observed / adopted / rejected
+
+---
+
+## Entries
+docs/ADR.md
+# Architecture Decision Records
+
+## Template
+
+### ADR-001: [Decision title]
+- Date:
+- Status: proposed / accepted / superseded
+- Context:
+- Decision:
+- Consequences:
+- Alternatives considered:
+
+---
+
+## Decisions
+docs/COMPONENT_MAP.md
+# Component Map
+
+## Template
+
+### Component: [Name]
+- Purpose:
+- Route(s):
+- Inputs / props:
+- Internal state:
+- Data dependencies:
+- Interacts with:
+- Accessibility notes:
+- Design rules:
+- Status:
+
+---
+
+## Components
+docs/DATA_FLOW.md
+# Data Flow
+
+## System Flow
+Source -> Fetcher -> Normalizer -> Deduper -> Scorer -> Database -> API -> UI -> User Action -> Status Update
+
+## Template
+
+### Flow: [Name]
+- Trigger:
+- Source data:
+- Transformations:
+- Persistence:
+- Consumer:
+- Failure modes:
+- Observability:
+- Related files:
+
+---
+
+## Flows
+
+The to-do list, principal-engineer style:
+
+Hard truth first: build the tactical brain before the pretty radar face. Don’t teach the sweep line to glow before it has anything worth revealing.
+
+Phase 0 — Project foundation
+Initialize repo and baseline structure.
+Create /docs, .cursor/rules, progress.txt, lessons.md, README.md.
+Generate first-pass canonical docs.
+Decide v1 stack.
+Lock initial naming conventions and file structure.
+
+Acceptance:
+
+Docs exist.
+Rules exist.
+Progress logging works.
+v1 scope is written down.
+Phase 1 — Product definition and system boundaries
+Finalize v1 goals and non-goals in PRD.md.
+Define user flows in APP_FLOW.md.
+Define visual meaning system in VISUAL_LANGUAGE_MAP.md.
+Define scoring rubric in SCORING_LOGIC.md.
+Define target sources and cadence in INGESTION_SOURCES.md.
+
+Acceptance:
+
+No major product ambiguity remains.
+There is a documented answer to “what are we building first?”
+Phase 2 — Backend model and contracts
+Define entities: jobs, companies, sources, scans, scores, notes, statuses.
+Define schema in BACKEND_STRUCTURE.md.
+Define ingestion lifecycle states.
+Define dedupe strategy.
+Define API shapes for list/detail/filter/status updates.
+
+Acceptance:
+
+Schema is explicit.
+API contracts are explicit.
+Data flow is documented.
+Phase 3 — Ingestion foundation
+Implement one structured ATS adapter first.
+Normalize raw postings into a canonical job shape.
+Add deduplication.
+Persist scans and job records.
+Add logging and failure handling.
+
+Acceptance:
+
+A scheduled run can fetch, normalize, dedupe, and store jobs.
+Failures are visible.
+Re-runs do not produce garbage duplicates.
+Phase 4 — Scoring engine
+Implement direct-title matching.
+Implement description-level signals.
+Implement stage/context signals.
+Implement penalties for noise and prestige traps.
+Produce final score + explanation fields.
+
+Acceptance:
+
+A job can be scored with human-readable reasons.
+Scoring logic is testable and documented.
+Phase 5 — Tactical review mode
+Build dense list/table view.
+Add filters by score, title family, stage, source, status.
+Add detail drawer/panel.
+Add status changes: reviewed, shortlisted, applied, archived.
+Add notes and outreach angle fields.
+
+Acceptance:
+
+You can actually use the app daily without the radar UI.
+This is the first true MVP.
+Phase 6 — Sonar/radar UI
+Build SVG radar canvas and sweep logic.
+Plot contacts using score/category logic.
+Reveal contacts via scan behavior.
+Connect blips to detail panel.
+Add event log and scan telemetry.
+Add mute toggle and reduced-motion support.
+
+Acceptance:
+
+The radar is functional, meaningful, and not annoying.
+It reflects real data from the tactical system.
+Phase 7 — Company/context intelligence
+Add company-level aggregation.
+Store company notes and inferred stage.
+Show why the role likely exists.
+Generate first-pass outreach angle.
+Link role patterns across multiple openings.
+
+Acceptance:
+
+The app helps you decide how to position yourself, not just where to click.
+Phase 8 — Inspiration and doctrine layer
+Add public/private content model.
+Build Doctrine/article section structure.
+Link articles to role categories or pain themes.
+Make inspiration and thesis content searchable.
+Keep this separate from core job workflow.
+
+Acceptance:
+
+Your operating system and your positioning start to reinforce each other.
+Phase 9 — Automation and notification layer
+Add scheduled scans multiple times per day.
+Add hot-watch list for favorite companies/sources.
+Add digest output.
+Add alerts for high-score matches.
+Add scan history view.
+
+Acceptance:
+
+The system actively surfaces value without manual babysitting.
+Phase 10 — Hardening and launch
+Mobile polish.
+Empty states / error states / loading states.
+Accessibility pass.
+Performance pass.
+Sound defaults and motion settings.
+Deployment and environment configuration.
+Smoke-test the full loop.
+
+Acceptance:
+
+Stable enough to trust daily.
+
+The interconnection map you want the system to preserve:
+
+INGESTION_SOURCES.md defines where jobs come from.
+BACKEND_STRUCTURE.md defines how they’re stored.
+SCORING_LOGIC.md defines how they’re judged.
+DATA_FLOW.md defines how they move.
+COMPONENT_MAP.md defines how the UI consumes them.
+FRONTEND_GUIDELINES.md defines how the UI looks and behaves.
+VISUAL_LANGUAGE_MAP.md defines what the visuals mean.
+ADR.md records meaningful technical decisions.
+INSPIRATION_LOG.md records design references and how they get adapted.
+progress.txt tracks execution state.
+lessons.md prevents repeat mistakes.
+
+That’s the operating system for the build itself.
+
+One more thing: your first real milestone should be plain ugly usefulness.
+
+Get this working before chasing cinema:
+
+ingest jobs
+normalize/store them
+score them
+review them in a dense table
+change statuses
+
+Then layer in the sonar UI. Otherwise you’ll end up with a beautiful submarine dashboard scanning an empty bathtub.
+
+If you want, I’ll write the actual first-pass contents for PRD.md, APP_FLOW.md, FRONTEND_GUIDELINES.md, and IMPLEMENTATION_PLAN.md next so you can drop them straight into the folder.
