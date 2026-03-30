@@ -3,7 +3,8 @@ import { supabaseServer } from "@/lib/db/supabaseServer";
 export default async function Home() {
   const hasEnv =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-    Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    (Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY) ||
+      Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY));
 
   let companyCount: number | null = null;
   let dbNote: string | null = null;

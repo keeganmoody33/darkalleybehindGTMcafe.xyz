@@ -1,0 +1,6 @@
+# Legacy static prototype — not part of the v1 Next.js app; indexing it duplicates context.
+darkalley-cursor/
+
+# Build artifacts (large, churn often)
+.next/
+out/

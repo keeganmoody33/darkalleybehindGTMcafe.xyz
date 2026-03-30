@@ -74,6 +74,20 @@
 - **Design rules**: Public read-only; must not expose secrets.
 - **Status**: complete (MVP)
 
+---
+
+### Component: OpsScanPage
+
+- **Purpose**: Manually trigger a Lever ingestion run (fetch → normalize → dedupe → persist) without exposing a public endpoint.
+- **Route(s)**: `/ops/scan`
+- **Inputs / props**: none (page); form posts `secret`, optional `sourceId`
+- **Internal state**: client form via `useActionState`
+- **Data dependencies**: `sources`, `scans`, `jobs`, `companies`; requires `SUPABASE_SERVICE_ROLE_KEY` + `OPS_SCAN_SECRET`
+- **Interacts with**: `src/app/actions/triggerScan.action.ts`, `src/lib/ingestion/runner.ts`
+- **Accessibility notes**: Status message uses `role="status"`; password field for shared secret.
+- **Design rules**: Ops-only; `robots` noindex; not linked from `PublicTopNav`.
+- **Status**: complete (MVP)
+
 ### Planned Component Families
 
 | Family | Location | Components (expected) |
