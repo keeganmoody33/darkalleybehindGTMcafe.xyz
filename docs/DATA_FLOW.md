@@ -42,7 +42,7 @@ Source API → Fetcher → Normalizer → Deduper → Scorer → Database → AP
 
 ### Flow: Ingestion scan
 
-- **Trigger**: Vercel Cron `GET /api/cron/ingest` (production, Bearer `CRON_SECRET`) or manual `/ops/scan` server action (`OPS_SCAN_SECRET`).
+- **Trigger**: Vercel Cron `GET /api/cron/ingest` three times daily (UTC `11`, `17`, `1` → 6am/noon/8pm **EST**; see `vercel.json`) with Bearer `CRON_SECRET`, or manual `/ops/scan` server action (`OPS_SCAN_SECRET`).
 - **Source data**: ATS API response (JSON array of job postings).
 - **Transformations**: Raw API shape → `NormalizedJob` (strip HTML, detect remote, parse dates, extract company name) → generate `dedupe_key` → check for existing record → if new, run scoring engine → produce `ScoreResult` with explanations.
 - **Persistence**: INSERT into `jobs` (ON CONFLICT dedupe_key DO NOTHING), INSERT into `scores`, UPSERT `companies` (create if not exists), INSERT `scans` record with stats.

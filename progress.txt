@@ -435,3 +435,17 @@ VERIFICATION:
 
 NOTES:
 - Cron runs on **production** deployments only. Local test: `curl -sS -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron/ingest"`.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Cron schedule aligned to 6am / noon / 8pm Eastern Standard Time.
+
+COMPLETED THIS SESSION:
+- `vercel.json`: three crons — `0 11 * * *`, `0 17 * * *`, `0 1 * * *` UTC (= 6:00, 12:00, 20:00 EST). README documents EDT drift and Hobby 2-job limit vs three entries.
+
+FILES TOUCHED:
+- vercel.json, README.md, progress.txt
+
+NEXT:
+- Redeploy production so Vercel picks up new cron definitions.
