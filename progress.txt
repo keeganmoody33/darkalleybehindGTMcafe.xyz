@@ -194,3 +194,48 @@ KNOWN BUGS:
 
 NOTES:
 - Service-role key is intentionally not set yet; it will be required before implementing privileged ops actions.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Public read-only surface MVP — `/jobs`, `/methodology`, `/progress` (server-side reads only).
+
+CURRENT PHASE:
+Phase 1 — Public read-only surface (MVP)
+
+COMPLETED THIS SESSION:
+- Added public routes:
+  - `/jobs` (read-only list + server-rendered filters)
+  - `/methodology` (renders `docs/SCORING_LOGIC.md`)
+  - `/progress` (renders `progress.txt`)
+- Added minimal public navigation (`PublicTopNav`) and wired it in the root layout.
+- Documented new surfaces/components in `docs/COMPONENT_MAP.md`.
+
+IN PROGRESS:
+- None.
+
+NEXT:
+- Decide initial public information architecture (what else is public besides jobs/methodology/progress).
+- Begin admin/ops layer (auth + RLS + gated routes) before enabling ingestion.
+
+BLOCKERS / QUESTIONS:
+- Public data policy is "jobs ok" — confirm whether apply URLs should remain public, or be redacted in the public surface.
+
+FILES TOUCHED:
+- src/components/layout/PublicTopNav.tsx (new)
+- src/app/layout.tsx (updated)
+- src/lib/public/jobs.ts (new)
+- src/app/jobs/page.tsx (new)
+- src/app/methodology/page.tsx (new)
+- src/app/progress/page.tsx (new)
+- docs/COMPONENT_MAP.md (updated)
+- progress.txt (updated)
+
+VERIFICATION:
+- Pending: run `npm run lint` and `npm run build`.
+
+KNOWN BUGS:
+- None confirmed (MVP routes only).
+
+NOTES:
+- All public pages are implemented as server components; no browser Supabase client usage.
