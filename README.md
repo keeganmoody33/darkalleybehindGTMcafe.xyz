@@ -75,7 +75,7 @@ npm run dev
 2. Ensure `sources` has an active Lever row with `config.company_slug` (see seed in `supabase/migrations/001_initial_schema.sql`).
 3. Open [`/ops/scan`](http://localhost:3000/ops/scan) (not linked in the public nav), enter the secret, and run the scan. New jobs are scored on insert and appear on [`/jobs`](http://localhost:3000/jobs) and [`/dashboard`](http://localhost:3000/dashboard) (tactical + radar modes).
 
-**Scheduled scans (production):** Vercel Cron calls [`/api/cron/ingest`](https://darkalleybehindthegtmcafe.xyz/api/cron/ingest) **three times per day** at **6:00, 12:00, and 20:00 Eastern Standard Time** (see [`vercel.json`](vercel.json): `11:00`, `17:00`, and `01:00` UTC). Set `CRON_SECRET` in Vercel to match; Vercel sends `Authorization: Bearer <CRON_SECRET>`. During **EDT**, wall-clock times shift by one hour (Vercel schedules in UTC). **Vercel Hobby** allows at most **two** cron jobs per project; this config needs **three** entries, so use a **Pro** (or higher) plan or remove one schedule.
+**Scheduled scans (production):** Vercel Cron hits [`/api/cron/ingest`](https://darkalleybehindthegtmcafe.xyz/api/cron/ingest) **twice daily** (`vercel.json`: `0 11 * * *` and `0 1 * * *` UTC). That lines up with **~6:00 and ~20:00 Eastern** in standard time; during daylight saving, local times shift by an hour because Vercel runs on UTC. Set `CRON_SECRET` in Vercel; it is sent as `Authorization: Bearer <CRON_SECRET>`. Two jobs stay within **Vercel Hobby** limits.
 
 ### Command center
 

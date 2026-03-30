@@ -452,3 +452,14 @@ VERIFICATION:
 
 NEXT:
 - None for schedule; confirm three crons appear under Vercel → Cron Jobs (requires plan that allows 3 jobs).
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Cron config that works on Vercel Hobby (max 2 jobs).
+
+COMPLETED THIS SESSION:
+- `vercel.json`: **two** crons only — `0 11 * * *` and `0 1 * * *` UTC (~6am / ~8pm Eastern in EST; DST shifts local time). Dropped midday run so Hobby limit is satisfied.
+
+FILES TOUCHED:
+- vercel.json, README.md, docs/DATA_FLOW.md, progress.txt
