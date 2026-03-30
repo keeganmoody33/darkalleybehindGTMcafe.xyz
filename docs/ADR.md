@@ -59,3 +59,41 @@
 - **Decision**: Use Supabase local dev stack (`supabase start`) for local development. Environment variables in `.env.local` switch between local and hosted Supabase. Supabase migrations keep schema in sync. Vercel for deployment.
 - **Consequences**: Must maintain migration discipline. `.env.local` must be gitignored. Two environment configs to manage.
 - **Alternatives considered**: Local-only with SQLite (no hosted path), hosted-only from day one (requires internet for dev).
+
+### ADR-006: One app with two surfaces + Supabase Auth/RLS boundary
+
+- **Date**: 2026-03-30
+- **Status**: accepted
+- **Context**: This product must preserve two surfaces: a public read-only experience and an admin/ops control layer. The repo currently contains (a) a legacy public static prototype (`darkalley-cursor/`) and (b) a Next.js + Supabase target architecture. Without an explicit boundary, "ops" capabilities (scan triggers, status edits, notes, scoring tuning) can accidentally leak into the public surface.
+- **Decision**:
+  - Use **one Next.js app** that contains **two explicit surfaces**:
+    - **Public surface**: browse/filter/learn; strictly read-only.
+    - **Admin/ops surface**: trigger scans, edit records, manage statuses/notes, tune scoring.
+  - Use **Supabase Auth + Row Level Security (RLS)** as the v1 boundary for all mutations and any privileged reads. Public read-only endpoints must be safe without authentication.
+  - Enforce a strict key boundary:
+    - `SUPABASE_SERVICE_ROLE_KEY` is **server-only** and must never be imported by client components or shipped to the browser.
+    - `NEXT_PUBLIC_SUPABASE_URL` (and, later, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) may exist client-side for read-only queries as needed.
+- **Consequences**:
+  - The app must implement auth checks and RLS policies before enabling admin mutations.
+  - The codebase must clearly separate "public" vs "admin" routes/components/actions to prevent accidental coupling.
+  - Local and hosted environments both require consistent auth/RLS behavior.
+- **Alternatives considered**:
+  - Two separate apps (public + ops) sharing a backend: clearer separation but higher maintenance overhead early.
+  - Temporary shared-secret admin token: faster initially but tends to become a permanent unsafe shortcut and does not integrate with RLS.
+
+### ADR-007: Supabase client split (server vs browser)
+
+- **Date**: 2026-03-30
+- **Status**: accepted
+- **Context**: The repo needs both (a) privileged server-side capabilities (ingestion runs, admin mutations) and (b) a safe path for read-only public browsing. The Supabase service role key is highly privileged and must never ship to the browser bundle.
+- **Decision**:
+  - Introduce explicit clients:
+    - `src/lib/db/supabaseServer.ts` uses `SUPABASE_SERVICE_ROLE_KEY` and is **server-only** (guarded by `server-only`).
+    - `src/lib/db/supabaseBrowser.ts` uses `NEXT_PUBLIC_SUPABASE_ANON_KEY` for safe browser usage when needed.
+  - Keep `src/lib/db/supabase.ts` as a compatibility server-only re-export for legacy imports.
+- **Consequences**:
+  - Any client component importing `src/lib/db/supabase.ts` will fail early (intended) because it is server-only.
+  - Public read paths must either be implemented as server reads (preferred) or use the anon browser client with RLS protecting private data.
+  - Environment variables must include `NEXT_PUBLIC_SUPABASE_ANON_KEY` (documented in `.env.example`).
+- **Alternatives considered**:
+  - Single client with conditional keys: too easy to accidentally bundle privileged secrets.

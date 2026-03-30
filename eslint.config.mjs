@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "darkalley-cursor/**",
     "next-env.d.ts",
   ]),
 ]);

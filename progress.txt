@@ -68,3 +68,129 @@ KNOWN BUGS:
 
 NOTES:
 - The darkalley-cursor/ subfolder contains an older prototype. It is not part of the v1 build but may be referenced for inspiration.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Repository audit — reconcile legacy static prototype with target OS architecture; lock public vs admin boundary decision.
+
+CURRENT PHASE:
+Phase 0 complete → preparing Phase 1 (scaffold + data model verification)
+
+COMPLETED THIS SESSION:
+- Audited current repo state (Next.js skeleton + docs/rules + Supabase schema migration + legacy static prototype).
+- Confirmed surface strategy: one app with two surfaces (public read-only + admin/ops).
+- Confirmed v1 admin boundary: Supabase Auth + RLS (free; clean long-term boundary).
+- Recorded boundary decision in docs/ADR.md (ADR-006).
+
+IN PROGRESS:
+- None (no product code changes approved yet).
+
+NEXT:
+- Phase 1 verification: ensure Supabase key boundaries are safe (service role server-only), apply/verify schema in the chosen environment, and prove read queries end-to-end.
+
+BLOCKERS / QUESTIONS:
+- Public surface requirements: which specific public pages are required for v1 (e.g., `/methodology`, `/progress`, `/jobs` read-only)?
+- Admin UX scope: minimal admin console routes required before ingestion is enabled.
+
+FILES TOUCHED:
+- docs/ADR.md (updated: ADR-006)
+- progress.txt (updated)
+
+VERIFICATION:
+- Read-only audit of repo tree and key files; no runtime verification performed (no behavior changes made).
+
+KNOWN BUGS:
+- Potential security risk to address in Phase 1: `SUPABASE_SERVICE_ROLE_KEY` must never be reachable by client bundles.
+
+NOTES:
+- `darkalley-cursor/` remains a useful proof-of-work artifact but must not define the Next.js/Supabase OS architecture.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Phase 1 verification — enforce Supabase key boundaries; prove server-side read path; document decisions.
+
+CURRENT PHASE:
+Phase 1 — Scaffold + data model (verification slice)
+
+COMPLETED THIS SESSION:
+- Implemented explicit Supabase client split: server-only vs browser-safe.
+- Added minimal server-side DB smoke read on home route (graceful when env not configured).
+- Documented Supabase client split decision in ADR (ADR-007).
+- Updated `.env.example` to include anon key.
+- Updated README with Phase 1 setup basics.
+
+IN PROGRESS:
+- None.
+
+NEXT:
+- Decide and implement initial public read-only routes (jobs browse + methodology) without exposing privileged data.
+- Implement Supabase Auth + RLS policies for admin mutations before enabling ops features.
+
+BLOCKERS / QUESTIONS:
+- Confirm minimum v1 public pages: `/jobs` (browse), `/methodology`, `/progress`?
+- Confirm whether public reads should be server-only or allow browser anon reads under RLS.
+
+FILES TOUCHED:
+- .env.example (updated)
+- src/lib/db/supabaseServer.ts (new)
+- src/lib/db/supabaseBrowser.ts (new)
+- src/lib/db/supabase.ts (updated)
+- src/app/page.tsx (updated)
+- docs/ADR.md (updated)
+- README.md (updated)
+- progress.txt (updated)
+
+VERIFICATION:
+- `npm run lint` (pass)
+- `npm run build` (pass)
+
+KNOWN BUGS:
+- None confirmed.
+
+NOTES:
+- `SUPABASE_SERVICE_ROLE_KEY` is now guarded as server-only via `server-only` import.
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Phase 1 verification — connect hosted Supabase, apply schema migration, and confirm live DB reads.
+
+CURRENT PHASE:
+Phase 1 — Scaffold + data model (hosted verification)
+
+COMPLETED THIS SESSION:
+- Retrieved hosted Supabase project URL + anon key from Supabase project settings.
+- Applied `supabase/migrations/001_initial_schema.sql` to the hosted Supabase database.
+- Verified tables exist and seed data loaded (companies count = 1).
+- Updated `.env.local` with hosted Supabase URL + anon key (service role remains placeholder).
+- Updated server Supabase client to allow anon-key fallback for read-only verification.
+
+IN PROGRESS:
+- None.
+
+NEXT:
+- Decide whether public reads will be server-only (recommended) vs browser anon under RLS.
+- Implement Supabase Auth + RLS before any admin mutations or ingestion runs.
+
+BLOCKERS / QUESTIONS:
+- Which hosted Supabase project is canonical if multiple exist? (Current: `cvkcwvmlnghwwvdqudod`.)
+- Confirm minimum v1 public pages and whether any data should be publicly visible from day one.
+
+FILES TOUCHED:
+- .env.local (updated)
+- src/lib/db/supabaseServer.ts (updated)
+- progress.txt (updated)
+
+VERIFICATION:
+- Supabase: applied migration; list tables shows `companies/sources/scans/jobs/scores/notes/status_history`.
+- Supabase: `select count(*) from public.companies` returned 1.
+- `npm run build` (pass)
+- `npm run lint` (pass)
+
+KNOWN BUGS:
+- None confirmed.
+
+NOTES:
+- Service-role key is intentionally not set yet; it will be required before implementing privileged ops actions.

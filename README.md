@@ -45,7 +45,29 @@ discovery.txt          Original product discovery document
 
 ## Getting started
 
-*Setup instructions will be added when Phase 1 (project scaffold) is complete.*
+### Prereqs
+
+- Node.js (project uses Next.js 16)
+- A Supabase project (hosted or local Supabase stack)
+
+### Environment variables
+
+Copy `.env.example` to `.env.local` and fill:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+
+### Database schema
+
+Apply `supabase/migrations/001_initial_schema.sql` to your Supabase Postgres database.
+
+### Run
+
+```bash
+npm install
+npm run dev
+```
 
 ## Current phase
 
