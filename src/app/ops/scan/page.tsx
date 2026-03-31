@@ -11,9 +11,9 @@ export default function OpsScanPage() {
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-12">
       <div className="mb-8 flex flex-col gap-2">
-        <h1 className="text-xl font-semibold tracking-tight">Lever ingestion</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Multi-source ingestion</h1>
         <p className="text-sm text-muted">
-          Server-side scan only. Requires{" "}
+          Runs all active sources (Lever, Greenhouse, Ashby, RSS) unless you pass a specific source UUID. Requires{" "}
           <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
             SUPABASE_SERVICE_ROLE_KEY
           </code>{" "}

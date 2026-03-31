@@ -13,7 +13,12 @@ export type EmployeeCountRange =
   | "201-500"
   | "500+";
 
-export type SourceType = "lever" | "greenhouse" | "ashby" | "manual";
+export type SourceType =
+  | "lever"
+  | "greenhouse"
+  | "ashby"
+  | "rss"
+  | "manual";
 
 export type ScanStatus = "pending" | "running" | "completed" | "failed";
 

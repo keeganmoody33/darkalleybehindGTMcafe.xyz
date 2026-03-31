@@ -1,4 +1,4 @@
-import { runLeverScan } from "@/lib/ingestion/runner";
+import { runIngestionScan } from "@/lib/ingestion/runner";
 
 export const dynamic = "force-dynamic";
 /** Allow long Lever fetches + many inserts on Pro / Fluid Compute. */
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       ? sourceIdParam.trim()
       : undefined;
 
-  const result = await runLeverScan({ sourceId });
+  const result = await runIngestionScan({ sourceId });
 
   if (!result.ok) {
     return Response.json(
@@ -38,13 +38,32 @@ export async function GET(request: Request) {
     );
   }
 
+  const failed = result.results.filter((r) => !r.ok);
+  const totals = result.results.reduce(
+    (acc, r) => ({
+      jobsFound: acc.jobsFound + r.jobsFound,
+      jobsNew: acc.jobsNew + r.jobsNew,
+      jobsDuplicate: acc.jobsDuplicate + r.jobsDuplicate,
+    }),
+    { jobsFound: 0, jobsNew: 0, jobsDuplicate: 0 }
+  );
+
+  if (failed.length === result.results.length && result.results.length > 0) {
+    return Response.json(
+      {
+        ok: false,
+        error: failed[0]?.error ?? "All source scans failed.",
+        results: result.results,
+        totals,
+      },
+      { status: 500 }
+    );
+  }
+
   return Response.json({
     ok: true,
-    scanId: result.scanId,
-    sourceId: result.sourceId,
-    sourceName: result.sourceName,
-    jobsFound: result.jobsFound,
-    jobsNew: result.jobsNew,
-    jobsDuplicate: result.jobsDuplicate,
+    results: result.results,
+    totals,
+    partialFailures: failed.length > 0 ? failed : undefined,
   });
 }

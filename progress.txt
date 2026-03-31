@@ -463,3 +463,29 @@ COMPLETED THIS SESSION:
 
 FILES TOUCHED:
 - vercel.json, README.md, docs/DATA_FLOW.md, progress.txt
+
+---
+
+DATE: 2026-03-30
+SESSION GOAL: Multi-source ingestion (Greenhouse, Ashby, RSS) + generalized runner; seed migration; cron/ops wired to scan all active sources.
+
+COMPLETED THIS SESSION:
+- Added fetchers: `greenhouse.ts`, `ashby.ts`, `rss.ts` (RemoteOK + Remotive with GTM keyword filter).
+- Extended `normalizer.ts` with Greenhouse, Ashby, RSS normalizers; removed duplicate GH/Ashby types from `ingestion.types.ts`.
+- Replaced single-Lever `runner.ts` with `runIngestionScan` (all active sources, per-source scan rows, auto-score on insert); kept `runLeverScan` as compatibility wrapper.
+- `SourceType` includes `rss`; cron + `triggerScanAction` use `runIngestionScan` and return per-source results / totals.
+- Ops UI copy updated; migration `002_multi_source_seed.sql` (Stripe Greenhouse, Linear Ashby, RemoteOK + Remotive RSS) — run manually on Supabase if not auto-applied.
+
+FILES TOUCHED:
+- src/lib/ingestion/fetchers/greenhouse.ts, ashby.ts, rss.ts (new)
+- src/lib/ingestion/normalizer.ts, runner.ts
+- src/lib/types/database.types.ts, ingestion.types.ts
+- src/app/api/cron/ingest/route.ts, src/app/actions/triggerScan.action.ts
+- src/app/ops/scan/page.tsx, ScanTriggerForm.tsx
+- supabase/migrations/002_multi_source_seed.sql (new)
+
+VERIFICATION:
+- `npm run build` (pass)
+
+NEXT:
+- Apply `002_multi_source_seed.sql` to production Supabase if migrations are not CI-applied.

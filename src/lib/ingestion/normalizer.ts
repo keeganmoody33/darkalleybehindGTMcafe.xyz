@@ -1,4 +1,7 @@
 import type { SourceType } from "@/lib/types/database.types";
+import type { GreenhouseJob } from "@/lib/ingestion/fetchers/greenhouse";
+import type { AshbyJob } from "@/lib/ingestion/fetchers/ashby";
+import type { RssJob } from "@/lib/ingestion/fetchers/rss";
 import type { LeverPosting, NormalizedJob } from "@/lib/types/ingestion.types";
 
 function stripHtml(html: string): string {
@@ -120,3 +123,93 @@ export function normalizeLeverPosting(
 }
 
 export { slugToDisplayName };
+
+
+function parsePostedAt(iso: string | undefined | null): Date | null {
+  if (!iso?.trim()) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function employmentFromAshby(raw: string | undefined | null): NormalizedJob["employmentType"] {
+  if (!raw?.trim()) return null;
+  return normalizeEmploymentType(raw);
+}
+
+export function normalizeGreenhouseJob(
+  job: GreenhouseJob,
+  _boardToken: string,
+  companyDisplayName: string
+): NormalizedJob {
+  const locationName = job.location?.name?.trim() ?? null;
+  const remote =
+    locationName != null ? /remote/i.test(locationName) : false;
+  const raw = job.content ?? "";
+  const plain = stripHtml(raw);
+
+  const dept =
+    job.departments?.map((d) => d.name).filter(Boolean).join(", ") || null;
+
+  return {
+    externalId: String(job.id),
+    externalUrl: job.absolute_url.trim(),
+    title: job.title.trim(),
+    descriptionRaw: raw,
+    descriptionPlain: plain,
+    companyName: companyDisplayName.trim() || slugToDisplayName(_boardToken),
+    location: locationName,
+    isRemote: remote,
+    department: dept,
+    employmentType: null,
+    postedAt: parsePostedAt(job.updated_at),
+    sourceType: "greenhouse",
+  };
+}
+
+export function normalizeAshbyJob(
+  job: AshbyJob,
+  _orgId: string,
+  companyDisplayName: string
+): NormalizedJob {
+  const raw =
+    job.descriptionHtml?.trim() ||
+    job.descriptionPlain?.trim() ||
+    "";
+  const plain =
+    job.descriptionPlain?.trim() || (raw ? stripHtml(raw) : "");
+
+  return {
+    externalId: job.id,
+    externalUrl: job.jobUrl.trim(),
+    title: job.title.trim(),
+    descriptionRaw: raw,
+    descriptionPlain: plain,
+    companyName: companyDisplayName.trim() || slugToDisplayName(_orgId),
+    location: job.location?.trim() ?? null,
+    isRemote: job.isRemote,
+    department: job.department?.trim() ?? job.team?.trim() ?? null,
+    employmentType: employmentFromAshby(job.employmentType),
+    postedAt: parsePostedAt(job.publishedAt),
+    sourceType: "ashby",
+  };
+}
+
+export function normalizeRssJob(job: RssJob): NormalizedJob {
+  const raw = job.description ?? "";
+  const plain = stripHtml(raw);
+
+  return {
+    externalId: job.id,
+    externalUrl: job.url.trim(),
+    title: job.title.trim(),
+    descriptionRaw: raw,
+    descriptionPlain: plain,
+    companyName: job.company.trim(),
+    location: job.isRemote ? "Remote" : null,
+    isRemote: job.isRemote,
+    department: null,
+    employmentType: null,
+    postedAt: parsePostedAt(job.postedAt),
+    sourceType: "rss",
+  };
+}

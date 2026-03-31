@@ -1,6 +1,6 @@
 "use server";
 
-import { runLeverScan } from "@/lib/ingestion/runner";
+import { runIngestionScan } from "@/lib/ingestion/runner";
 
 export type ScanActionState = {
   ok: boolean;
@@ -35,14 +35,20 @@ export async function triggerScanAction(
       ? sourceIdRaw.trim()
       : undefined;
 
-  const result = await runLeverScan({ sourceId });
+  const result = await runIngestionScan({ sourceId });
 
   if (!result.ok) {
     return { ok: false, message: result.error };
   }
 
+  const parts = result.results.map((r) =>
+    r.ok
+      ? `${r.sourceName}: found ${r.jobsFound}, new ${r.jobsNew}, dup ${r.jobsDuplicate}${r.scanId ? ` (${r.scanId.slice(0, 8)}…)` : ""}`
+      : `${r.sourceName}: failed — ${r.error ?? "unknown"}`
+  );
+
   return {
     ok: true,
-    message: `Done — ${result.sourceName}: found ${result.jobsFound}, inserted ${result.jobsNew}, skipped ${result.jobsDuplicate} duplicates (scan ${result.scanId}).`,
+    message: `Done — ${parts.join(" · ")}`,
   };
 }

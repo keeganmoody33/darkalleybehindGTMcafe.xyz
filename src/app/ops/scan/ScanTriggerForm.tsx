@@ -32,7 +32,7 @@ export function ScanTriggerForm() {
         <span className="text-muted">Source id (optional)</span>
         <input
           name="sourceId"
-          placeholder="Defaults to first active Lever source"
+          placeholder="Leave empty to scan every active source"
           className="h-10 rounded-lg border border-input bg-background px-3 font-mono text-sm"
         />
       </label>
@@ -42,7 +42,7 @@ export function ScanTriggerForm() {
         disabled={pending}
         className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
       >
-        {pending ? "Running…" : "Run Lever scan"}
+        {pending ? "Running…" : "Run ingestion scan"}
       </button>
 
       {state.message ? (

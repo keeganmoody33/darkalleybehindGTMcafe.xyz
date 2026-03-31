@@ -47,28 +47,6 @@ export interface LeverPosting {
   };
 }
 
-export interface GreenhouseJob {
-  id: number;
-  title: string;
-  absolute_url: string;
-  updated_at: string;
-  location: { name: string };
-  content: string;
-  departments: { id: number; name: string }[];
-}
-
-export interface AshbyJob {
-  id: string;
-  title: string;
-  externalLink: string;
-  location: string;
-  employmentType: string;
-  department: string;
-  publishedAt: string;
-  descriptionHtml?: string;
-  descriptionPlain?: string;
-}
-
 export interface ScanResult {
   jobsFound: number;
   jobsNew: number;
