@@ -38,6 +38,8 @@ export interface DashboardFilters {
   minScore?: number;
   maxScore?: number;
   isRemote?: boolean;
+  /** Only jobs first seen by Sonar within this many days (`discovered_at`). Omit or `null` = no cutoff. */
+  discoveredWithinDays?: number | null;
   sortBy?: "score" | "date" | "title";
   sortDir?: "asc" | "desc";
   limit?: number;
@@ -89,6 +91,7 @@ export async function getDashboardJobs(
     minScore,
     maxScore,
     isRemote,
+    discoveredWithinDays,
     sortBy = "score",
     sortDir = "desc",
     limit = 50,
@@ -101,6 +104,16 @@ export async function getDashboardJobs(
       "*, companies(name), sources(name), scores(founding_score, builder_score, gtm_fit_score, noise_penalty, prestige_trap_penalty, overall_score, explanation)",
       { count: "exact" },
     );
+
+  if (
+    typeof discoveredWithinDays === "number" &&
+    discoveredWithinDays > 0 &&
+    Number.isFinite(discoveredWithinDays)
+  ) {
+    const cutoff = new Date();
+    cutoff.setUTCDate(cutoff.getUTCDate() - discoveredWithinDays);
+    query = query.gte("discovered_at", cutoff.toISOString());
+  }
 
   if (q) {
     query = query.ilike("title", `%${q}%`);

@@ -25,19 +25,42 @@ function formatIso(iso: string) {
   }).format(d);
 }
 
+function parseDiscoveredWithinDays(
+  raw: string | string[] | undefined,
+): number | null {
+  const r = toStr(raw).trim().toLowerCase();
+  if (r === "all" || r === "0") return null;
+  if (!r) return 14;
+  const n = Number.parseInt(r, 10);
+  if (n === 7 || n === 14 || n === 30) return n;
+  return 14;
+}
+
 export default async function JobsPage(props: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = (await props.searchParams) ?? {};
 
   const q = toStr(sp.q).trim();
-  const status = toStr(sp.status).trim();
+  const statusRaw = toStr(sp.status).trim();
+  const status =
+    statusRaw && statusRaw !== "all" ? statusRaw : undefined;
   const minScore = toInt(sp.minScore);
+  const discoveredWithinDays = parseDiscoveredWithinDays(sp.recent);
+
+  const recentParam = toStr(sp.recent).trim();
+  const recentForm =
+    recentParam === "all" || recentParam === "0"
+      ? "all"
+      : recentParam === "7" || recentParam === "30"
+        ? recentParam
+        : "14";
 
   const result = await getPublicJobs({
     q: q || undefined,
-    status: status || undefined,
+    status,
     minScore: minScore ?? undefined,
+    discoveredWithinDays,
     limit: 50,
   });
 
@@ -46,14 +69,17 @@ export default async function JobsPage(props: {
       <div className="flex flex-col gap-2">
         <h1 className="text-xl font-semibold tracking-tight">Jobs</h1>
         <p className="text-sm text-muted">
-          Public read-only browse. Ops actions (scan, edit, status changes) are
-          private.
+          Public read-only browse. By default shows roles{" "}
+          <span className="text-foreground">
+            first ingested in the last 14 days
+          </span>
+          . Use &quot;Added to Sonar&quot; for other windows or all time.
         </p>
       </div>
 
       <form
         method="get"
-        className="mt-6 grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-3"
+        className="mt-6 grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         <label className="grid gap-1 text-sm">
           <span className="text-muted">Search title</span>
@@ -69,7 +95,7 @@ export default async function JobsPage(props: {
           <span className="text-muted">Status</span>
           <select
             name="status"
-            defaultValue={status || "all"}
+            defaultValue={statusRaw || "all"}
             className="h-9 rounded-lg border border-input bg-background px-3 text-sm"
           >
             <option value="all">All</option>
@@ -84,6 +110,20 @@ export default async function JobsPage(props: {
         </label>
 
         <label className="grid gap-1 text-sm">
+          <span className="text-muted">Added to Sonar</span>
+          <select
+            name="recent"
+            defaultValue={recentForm}
+            className="h-9 rounded-lg border border-input bg-background px-3 text-sm"
+          >
+            <option value="7">Last 7 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="all">All time</option>
+          </select>
+        </label>
+
+        <label className="grid gap-1 text-sm">
           <span className="text-muted">Min overall score</span>
           <input
             name="minScore"
@@ -94,7 +134,7 @@ export default async function JobsPage(props: {
           />
         </label>
 
-        <div className="flex flex-wrap gap-2 sm:col-span-3">
+        <div className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-4">
           <button className="h-9 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground">
             Apply filters
           </button>
@@ -137,8 +177,17 @@ export default async function JobsPage(props: {
           </div>
         ) : result.jobs.length === 0 ? (
           <div className="px-4 py-10 text-sm text-muted">
-            No jobs yet. Once ingestion starts, this page will populate
-            automatically from the database.
+            {discoveredWithinDays != null ? (
+              <>
+                No jobs ingested in the last {discoveredWithinDays} days. Try
+                &quot;All time&quot; or run an ingestion scan from ops.
+              </>
+            ) : (
+              <>
+                No jobs yet. Once ingestion starts, this page will populate
+                automatically from the database.
+              </>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -189,4 +238,3 @@ export default async function JobsPage(props: {
     </main>
   );
 }
-

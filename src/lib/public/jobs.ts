@@ -45,11 +45,14 @@ export async function getPublicJobs(input: {
   status?: string;
   minScore?: number;
   limit?: number;
+  /** Only jobs first ingested within this many days. `null` = no cutoff. */
+  discoveredWithinDays?: number | null;
 }) {
   const limit = Math.min(Math.max(input.limit ?? 50, 1), 100);
   const q = (input.q ?? "").trim();
   const status = (input.status ?? "").trim();
   const minScore = input.minScore;
+  const discoveredWithinDays = input.discoveredWithinDays;
 
   let query = supabaseServer
     .from("jobs")
@@ -68,6 +71,16 @@ export async function getPublicJobs(input: {
     )
     .order("discovered_at", { ascending: false })
     .limit(limit);
+
+  if (
+    typeof discoveredWithinDays === "number" &&
+    discoveredWithinDays > 0 &&
+    Number.isFinite(discoveredWithinDays)
+  ) {
+    const cutoff = new Date();
+    cutoff.setUTCDate(cutoff.getUTCDate() - discoveredWithinDays);
+    query = query.gte("discovered_at", cutoff.toISOString());
+  }
 
   if (q) {
     // Search by title (safe + simple for MVP). Company search can be added once we introduce stable joins/views.
