@@ -36,6 +36,16 @@ function parseDiscoveredWithinDays(
   return 14;
 }
 
+function parsePostedWithinDays(
+  raw: string | string[] | undefined,
+): number | null {
+  const r = toStr(raw).trim().toLowerCase();
+  if (!r || r === "all" || r === "0") return null;
+  const n = Number.parseInt(r, 10);
+  if (n === 7 || n === 14 || n === 30) return n;
+  return null;
+}
+
 export default async function JobsPage(props: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
@@ -47,6 +57,7 @@ export default async function JobsPage(props: {
     statusRaw && statusRaw !== "all" ? statusRaw : undefined;
   const minScore = toInt(sp.minScore);
   const discoveredWithinDays = parseDiscoveredWithinDays(sp.recent);
+  const postedWithinDays = parsePostedWithinDays(sp.posted);
 
   const recentParam = toStr(sp.recent).trim();
   const recentForm =
@@ -56,11 +67,18 @@ export default async function JobsPage(props: {
         ? recentParam
         : "14";
 
+  const postedParam = toStr(sp.posted).trim();
+  const postedForm =
+    postedParam === "7" || postedParam === "14" || postedParam === "30"
+      ? postedParam
+      : "all";
+
   const result = await getPublicJobs({
     q: q || undefined,
     status,
     minScore: minScore ?? undefined,
     discoveredWithinDays,
+    postedWithinDays,
     limit: 50,
   });
 
@@ -79,7 +97,7 @@ export default async function JobsPage(props: {
 
       <form
         method="get"
-        className="mt-6 grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4"
+        className="mt-6 grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
       >
         <label className="grid gap-1 text-sm">
           <span className="text-muted">Search title</span>
@@ -124,6 +142,20 @@ export default async function JobsPage(props: {
         </label>
 
         <label className="grid gap-1 text-sm">
+          <span className="text-muted">Posted on ATS</span>
+          <select
+            name="posted"
+            defaultValue={postedForm}
+            className="h-9 rounded-lg border border-input bg-background px-3 text-sm"
+          >
+            <option value="all">Any</option>
+            <option value="7">Last 7 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="30">Last 30 days</option>
+          </select>
+        </label>
+
+        <label className="grid gap-1 text-sm">
           <span className="text-muted">Min overall score</span>
           <input
             name="minScore"
@@ -134,7 +166,7 @@ export default async function JobsPage(props: {
           />
         </label>
 
-        <div className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-4">
+        <div className="flex flex-wrap gap-2 sm:col-span-2 xl:col-span-5">
           <button className="h-9 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground">
             Apply filters
           </button>

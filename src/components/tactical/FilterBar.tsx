@@ -11,18 +11,21 @@ interface FilterBarProps {
     sortDir?: string;
     isRemote?: string;
     recent?: string;
+    /** ATS `posted_at` window; `all` = no filter */
+    posted?: string;
   };
   action?: string;
 }
 
 export function FilterBar({ initialFilters, action = "/dashboard" }: FilterBarProps) {
   const recentVal = initialFilters.recent ?? "14";
+  const postedVal = initialFilters.posted ?? "all";
 
   return (
     <form
       method="get"
       action={action}
-      className="grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-5"
+      className="grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
     >
       <label className="grid gap-1 text-xs">
         <span className="text-zinc-400">Search</span>
@@ -67,6 +70,20 @@ export function FilterBar({ initialFilters, action = "/dashboard" }: FilterBarPr
       </label>
 
       <label className="grid gap-1 text-xs">
+        <span className="text-zinc-400">Posted on ATS</span>
+        <select
+          name="posted"
+          defaultValue={postedVal}
+          className="h-8 rounded-lg border border-input bg-background px-2 text-sm text-foreground"
+        >
+          <option value="all">Any</option>
+          <option value="7">Last 7 days</option>
+          <option value="14">Last 14 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </label>
+
+      <label className="grid gap-1 text-xs">
         <span className="text-zinc-400">Min score</span>
         <input
           name="minScore"
@@ -90,7 +107,7 @@ export function FilterBar({ initialFilters, action = "/dashboard" }: FilterBarPr
         </select>
       </label>
 
-      <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-5">
+      <div className="flex items-center gap-2 sm:col-span-2 xl:col-span-6">
         <label className="flex items-center gap-2 text-xs text-zinc-400">
           <input
             type="checkbox"
@@ -103,7 +120,7 @@ export function FilterBar({ initialFilters, action = "/dashboard" }: FilterBarPr
         </label>
       </div>
 
-      <div className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-5">
+      <div className="flex flex-wrap gap-2 sm:col-span-2 xl:col-span-6">
         <button
           type="submit"
           className="h-8 rounded-lg bg-sonar-accent px-4 text-xs font-medium text-zinc-950"

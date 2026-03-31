@@ -2,78 +2,81 @@
 
 ## Strategy
 
-v1 focuses on **structured ATS API endpoints** — they return clean JSON, are publicly accessible for job listings, and cover most startups. Scraping is out of scope for v1.
+Primary path: **public ATS JSON APIs** and **aggregator JSON/RSS** — no auth for public boards, predictable shapes, ToS-friendly when using documented endpoints.
 
-## v1 Sources
+**Niche / closed channels** (Slack, LinkedIn, private communities): use **manual job entry** on `/ops/scan` (gated by `OPS_SCAN_SECRET`) so you can paste roles without scraping gated sites.
 
-### 1. Lever (Primary)
+## Implemented source types (`sources.type`)
+
+| Type | Config | Fetcher |
+|------|--------|---------|
+| `lever` | `company_slug` (or `company`), optional `company_name` | Lever public postings JSON |
+| `greenhouse` | `board_token` (or `company_slug`), optional `company_name` | Greenhouse board API `?content=true` |
+| `ashby` | `org_id` (or `company_slug`), optional `company_name` | Ashby public job board API |
+| `rss` | `provider`: `remoteok` (default), `remotive`, or `rss_feed` | See below |
+| `manual` | `{}` | Not fetched by cron — jobs inserted via ops manual form |
+
+### RSS `provider` values
+
+- **`remoteok`** — `https://remoteok.com/api` (JSON), filtered by `keywords` or app default GTM list.
+- **`remotive`** — Remotive categories (software-dev, marketing, business, data), keyword filter.
+- **`rss_feed`** (alias **`feed`**) — **requires** `feed_url` (RSS 2.0 or Atom). Optional `company_name` as the default company label per item. Optional `keywords` array; default uses the same GTM keyword list as RemoteOK.
+
+Some third-party feeds return **403** to non-browser clients; if a feed fails, try another URL or leave that source inactive until you confirm access.
+
+## v1 ATS (details)
+
+### Lever
 
 - **API**: `https://api.lever.co/v0/postings/{company}?mode=json`
-- **Auth**: None required for public postings.
-- **Rate limits**: Undocumented but generous for public endpoints. Recommend 1 req/sec.
-- **Response shape**: Array of posting objects with `id`, `text` (title), `description` (HTML), `categories` (team, location, commitment), `createdAt`, `hostedUrl`.
-- **Normalization notes**: Description is HTML — strip to plain text for scoring. `categories.commitment` maps to `employment_type`. `categories.location` maps to `location`. Remote detection from location string.
-- **Target companies**: Curated list of startups known to use Lever (configurable in `sources` table).
+- **Auth**: None for public postings.
+- **Normalization**: HTML → plain text; remote from categories/location.
 
-### 2. Greenhouse (Secondary)
+### Greenhouse
 
-- **API**: `https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs`
-- **Auth**: None required for public job board API.
-- **Rate limits**: Documented at 50 req/10 sec.
-- **Response shape**: `{ jobs: [{ id, title, location: { name }, content, updated_at, absolute_url }] }`. Detail endpoint: `/v1/boards/{board_token}/jobs/{id}` for full HTML content.
-- **Normalization notes**: `content` is HTML. Location parsing required. No explicit remote flag — infer from location string.
-- **Target companies**: Curated list (configurable).
+- **API**: `https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs?content=true`
+- **Auth**: None for public boards.
+- **Rate limits**: Documented 50 req / 10s per board.
 
-### 3. Ashby (Tertiary)
+### Ashby
 
-- **API**: `https://api.ashbyhq.com/posting-api/job-board/{org}`
-- **Auth**: None required for public job board.
-- **Response shape**: `{ jobs: [{ id, title, location, employmentType, department, publishedAt, externalLink }] }`.
-- **Normalization notes**: Cleaner structure than Lever/Greenhouse. Description may require separate detail fetch.
-- **Target companies**: Curated list (configurable).
+- **API**: `https://api.ashbyhq.com/posting-api/job-board/{org}?includeCompensation=true`
+- **Auth**: None for public boards.
+- **Fields**: `jobUrl`, `publishedAt`, `descriptionHtml` / `descriptionPlain`, etc.
 
-## Planned v2 Sources
+## Layer B — Aggregators (implemented)
 
-| Source | Type | Notes |
-|---|---|---|
-| Y Combinator Work at a Startup | Aggregator | Structured listings, would need scraping or API discovery |
-| Wellfound (AngelList) | Aggregator | API access varies; may need auth |
-| Hacker News "Who is Hiring" | Monthly thread | Parse structured comments |
-| LinkedIn Jobs | Platform | Requires API access or scraping (complex) |
-| Custom company career pages | Scraping | Per-company adapters |
+| Source | Mechanism | Notes |
+|--------|-----------|--------|
+| RemoteOK | JSON API | Broad remote tech roles; keyword gate |
+| Remotive | JSON API | Category sweep + keywords |
+| Generic RSS/Atom | `provider: rss_feed` + `feed_url` | For stable newsletter/board feeds |
 
-## Scan Configuration
+## Layer B/C — still planned (not in repo)
+
+| Source | Notes |
+|--------|--------|
+| YC Work at a Startup | HTML; dedicated parser |
+| Hacker News “Who is hiring” | Monthly; Algolia HN API or thread parse |
+| LinkedIn / Indeed | Partner APIs or vendor data; legal review |
+| Custom career pages | Per-site adapters or manual capture |
+
+## Scan configuration
 
 | Setting | Default | Notes |
-|---|---|---|
-| `scan_frequency_minutes` | 360 (6 hours) | Per-source, configurable |
-| Max concurrent fetches | 3 | Avoid rate limit issues |
-| Retry on failure | 2 attempts with exponential backoff | |
-| Stale threshold | 60 days | Jobs older than this get noise penalty |
+|---------|---------|--------|
+| `scan_frequency_minutes` | 360 | Per `sources` row |
+| Cron | 2× daily UTC | [`vercel.json`](../vercel.json) → [`/api/cron/ingest`](../src/app/api/cron/ingest/route.ts) |
+| `manual` sources | — | Skipped by automated scan |
 
-## Company Curation
+## Company curation
 
-The `sources` table stores which companies to scan on each ATS. Initial seeding:
+Use the `sources` table: one row per board/feed. Seeds live in [`supabase/migrations/`](../supabase/migrations/) (`001`–`003`). Add rows for PLG/revops-heavy companies (Lever/Greenhouse/Ashby slugs from careers URLs).
 
-1. Manually add 10–20 target companies per ATS platform.
-2. Focus on: seed/series-A startups, companies known to hire GTM engineers, companies in the user's target market.
-3. Over time, add companies discovered through the review process.
+## Canonical job shape (post-normalization)
 
-## Canonical Job Shape (post-normalization)
+Matches [`NormalizedJob`](../src/lib/types/ingestion.types.ts): `externalId`, `externalUrl`, `title`, `descriptionRaw` / `descriptionPlain`, `companyName`, `location`, `isRemote`, `department`, `employmentType`, `postedAt`, `sourceType` including `lever` | `greenhouse` | `ashby` | `rss` | `manual`.
 
-```typescript
-interface NormalizedJob {
-  externalId: string;
-  externalUrl: string;
-  title: string;
-  descriptionRaw: string;      // Original HTML/markdown
-  descriptionPlain: string;    // Stripped text for scoring
-  companyName: string;
-  location: string | null;
-  isRemote: boolean;
-  department: string | null;
-  employmentType: string | null;
-  postedAt: Date | null;
-  sourceType: 'lever' | 'greenhouse' | 'ashby';
-}
-```
+## Compliance
+
+Prefer **public APIs** and **feeds you’re allowed to poll**. For LinkedIn and members-only Slack job channels, use **manual entry** or a licensed data provider rather than scraping behind logins.

@@ -12,7 +12,8 @@ Source API → Fetcher → Normalizer → Deduper → Scorer → Database → AP
 ┌──────────┐     ┌──────────┐     ┌────────────┐     ┌─────────┐     ┌─────────┐
 │  ATS API │────▶│ Fetcher  │────▶│ Normalizer │────▶│ Deduper │────▶│ Scorer  │
 │ (Lever,  │     │ (per-    │     │ (raw →     │     │ (check  │     │ (5 dim  │
-│  GH, AB) │     │  source) │     │  canonical)│     │  key)   │     │  + comp)│
+│ GH, AB,  │     │  source) │     │  canonical)│     │  key)   │     │  + comp)│
+│ RSS, man)│     │          │     │            │     │         │     │         │
 └──────────┘     └──────────┘     └────────────┘     └─────────┘     └─────────┘
                                                                           │
                                                                           ▼
@@ -43,13 +44,21 @@ Source API → Fetcher → Normalizer → Deduper → Scorer → Database → AP
 ### Flow: Ingestion scan
 
 - **Trigger**: Vercel Cron `GET /api/cron/ingest` twice daily (UTC `11` and `1`; see `vercel.json`) with Bearer `CRON_SECRET`, or manual `/ops/scan` server action (`OPS_SCAN_SECRET`).
-- **Source data**: ATS API response (JSON array of job postings).
-- **Transformations**: Raw API shape → `NormalizedJob` (strip HTML, detect remote, parse dates, extract company name) → generate `dedupe_key` → check for existing record → if new, run scoring engine → produce `ScoreResult` with explanations.
-- **Persistence**: INSERT into `jobs` (ON CONFLICT dedupe_key DO NOTHING), INSERT into `scores`, UPSERT `companies` (create if not exists), INSERT `scans` record with stats.
-- **Consumer**: Public `/jobs` and `/dashboard` read from Supabase (server-side). Radar mode plots contacts; tactical mode lists rows. Event log (dashboard) shows summary-style entries.
-- **Failure modes**: ATS API timeout (retry 2x with backoff), ATS API 404 (mark source as errored), malformed response (log and skip individual records), database constraint violation (log, do not crash scan).
-- **Observability**: `scans` table tracks status, timing, counts, errors. Console logging for dev. Future: structured logs.
-- **Related files**: `src/lib/ingestion/runner.ts`, `src/app/api/cron/ingest/route.ts`, `src/app/actions/triggerScan.action.ts`, `vercel.json`, `src/lib/ingestion/fetchers/*.ts`, `src/lib/ingestion/normalizer.ts`, `src/lib/ingestion/deduper.ts`, `src/lib/scoring/scorer.ts`.
+- **Source data**: Per **active** `sources` row: Lever / Greenhouse / Ashby public JSON, or RSS (`remoteok`, `remotive`, or generic `rss_feed` + `feed_url`). Type `manual` is skipped by the scan loop.
+- **Transformations**: Raw payload → `NormalizedJob` (strip HTML, detect remote, parse dates, company name) → `dedupe_key` from `title + company + sourceType` → insert if new → `scoreJob` → `scores` row.
+- **Persistence**: INSERT `jobs`, INSERT `scores`, UPSERT `companies`, one `scans` row per source with counts; update `sources.last_scanned_at`.
+- **Consumer**: `/jobs` and `/dashboard` read via `getPublicJobs` / `getDashboardJobs` with optional filters: **ingested** window (`discovered_at`) and **ATS posted** window (`posted_at`).
+- **Failure modes**: Per-source try/catch: failed scan marks that `scans` row failed; other sources continue. Duplicate `dedupe_key` counts as duplicate, not error.
+- **Observability**: `scans` table; cron JSON returns `results[]` and `totals`.
+- **Related files**: `src/lib/ingestion/runner.ts`, `src/app/api/cron/ingest/route.ts`, `src/app/actions/triggerScan.action.ts`, `src/lib/ingestion/fetchers/*.ts`, `src/lib/ingestion/normalizer.ts`, `src/lib/ingestion/deduper.ts`, `src/lib/scoring/scorer.ts`, `src/lib/data/jobs.ts`, `src/lib/public/jobs.ts`.
+
+### Flow: Manual job entry
+
+- **Trigger**: `/ops/scan` form “Manual job” + `OPS_SCAN_SECRET`.
+- **Source data**: Title, company, URL, optional description/location/posted date/remote flag.
+- **Transformations**: Build `NormalizedJob` with `sourceType: manual` → `scoreJob` → same dedupe rules as ingest (`manual` in dedupe key).
+- **Persistence**: Requires an active `sources` row with `type = manual` (seeded in migration `003`). INSERT `jobs` + `scores`.
+- **Related files**: `src/app/actions/insertManualJob.action.ts`, `src/app/ops/scan/ManualJobForm.tsx`.
 
 ### Flow: Status update
 

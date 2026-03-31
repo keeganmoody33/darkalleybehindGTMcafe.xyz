@@ -489,3 +489,19 @@ VERIFICATION:
 
 NEXT:
 - Apply `002_multi_source_seed.sql` to production Supabase if migrations are not CI-applied.
+
+---
+
+DATE: 2026-03-31
+SESSION GOAL: Plan — GTM multi-source + niche (RSS feed provider, posted_at filters, manual ops, seeds, docs).
+
+COMPLETED:
+- Generic RSS/Atom fetcher (`provider: rss_feed` + `feed_url`) in rss.ts + runner.
+- `postedWithinDays` on getDashboardJobs / getPublicJobs; dashboard + /jobs UI ("Posted on ATS").
+- Manual job server action + ManualJobForm on /ops/scan; migration 003 (manual source, extra Lever/GH/Ashby, inactive rss_feed template).
+- Expanded GTM_FIT_KEYWORDS.targetTitles.
+- Docs: INGESTION_SOURCES.md, DATA_FLOW.md, BACKEND_STRUCTURE.md, README.
+
+FILES: src/lib/ingestion/fetchers/rss.ts, runner.ts, jobs.ts, public/jobs.ts, dashboard/page.tsx, jobs/page.tsx, FilterBar.tsx, insertManualJob.action.ts, ManualJobForm.tsx, ops/scan/page.tsx, scoring/config.ts, supabase/migrations/003_*.sql, docs/*, README.
+
+VERIFICATION: npm run build (pass).

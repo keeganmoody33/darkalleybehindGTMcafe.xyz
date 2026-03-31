@@ -72,7 +72,7 @@ npm run dev
 ### Ops: Multi-source ingestion
 
 1. Set `SUPABASE_SERVICE_ROLE_KEY` (writes require the service role) and `OPS_SCAN_SECRET` in `.env.local`.
-2. Ensure `sources` has active rows: Lever (`config.company_slug`), Greenhouse (`board_token`), Ashby (`org_id`), or RSS (`provider`: `remoteok` | `remotive`, optional `keywords`). See seeds in `supabase/migrations/001_initial_schema.sql` and `002_multi_source_seed.sql`.
+2. Ensure `sources` has active rows: Lever (`company_slug`), Greenhouse (`board_token`), Ashby (`org_id`), RSS (`provider`: `remoteok` | `remotive` | `rss_feed` + `feed_url`, optional `keywords`), and optionally `manual` for the manual job form. See `supabase/migrations/001_initial_schema.sql`, `002_multi_source_seed.sql`, and `003_manual_and_gtm_sources.sql`.
 3. Open [`/ops/scan`](http://localhost:3000/ops/scan) (not linked in the public nav), enter the secret, and run the scan. With no `sourceId`, **every** active source is scanned. New jobs are scored on insert and appear on [`/jobs`](http://localhost:3000/jobs) and [`/dashboard`](http://localhost:3000/dashboard).
 
 **Scheduled scans (production):** Vercel Cron hits [`/api/cron/ingest`](https://darkalleybehindthegtmcafe.xyz/api/cron/ingest) **twice daily** (`vercel.json`: `0 11 * * *` and `0 1 * * *` UTC). That lines up with **~6:00 and ~20:00 Eastern** in standard time; during daylight saving, local times shift by an hour because Vercel runs on UTC. Set `CRON_SECRET` in Vercel; it is sent as `Authorization: Bearer <CRON_SECRET>`. Two jobs stay within **Vercel Hobby** limits.

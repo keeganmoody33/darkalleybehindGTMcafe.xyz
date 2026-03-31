@@ -47,12 +47,15 @@ export async function getPublicJobs(input: {
   limit?: number;
   /** Only jobs first ingested within this many days. `null` = no cutoff. */
   discoveredWithinDays?: number | null;
+  /** Only jobs with `posted_at` in range (excludes null). `null` = no cutoff. */
+  postedWithinDays?: number | null;
 }) {
   const limit = Math.min(Math.max(input.limit ?? 50, 1), 100);
   const q = (input.q ?? "").trim();
   const status = (input.status ?? "").trim();
   const minScore = input.minScore;
   const discoveredWithinDays = input.discoveredWithinDays;
+  const postedWithinDays = input.postedWithinDays;
 
   let query = supabaseServer
     .from("jobs")
@@ -80,6 +83,16 @@ export async function getPublicJobs(input: {
     const cutoff = new Date();
     cutoff.setUTCDate(cutoff.getUTCDate() - discoveredWithinDays);
     query = query.gte("discovered_at", cutoff.toISOString());
+  }
+
+  if (
+    typeof postedWithinDays === "number" &&
+    postedWithinDays > 0 &&
+    Number.isFinite(postedWithinDays)
+  ) {
+    const postedCutoff = new Date();
+    postedCutoff.setUTCDate(postedCutoff.getUTCDate() - postedWithinDays);
+    query = query.gte("posted_at", postedCutoff.toISOString());
   }
 
   if (q) {

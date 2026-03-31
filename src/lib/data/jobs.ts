@@ -40,6 +40,8 @@ export interface DashboardFilters {
   isRemote?: boolean;
   /** Only jobs first seen by Sonar within this many days (`discovered_at`). Omit or `null` = no cutoff. */
   discoveredWithinDays?: number | null;
+  /** Only jobs whose ATS `posted_at` is within this many days (excludes null `posted_at`). Omit or `null` = no cutoff. */
+  postedWithinDays?: number | null;
   sortBy?: "score" | "date" | "title";
   sortDir?: "asc" | "desc";
   limit?: number;
@@ -92,6 +94,7 @@ export async function getDashboardJobs(
     maxScore,
     isRemote,
     discoveredWithinDays,
+    postedWithinDays,
     sortBy = "score",
     sortDir = "desc",
     limit = 50,
@@ -113,6 +116,16 @@ export async function getDashboardJobs(
     const cutoff = new Date();
     cutoff.setUTCDate(cutoff.getUTCDate() - discoveredWithinDays);
     query = query.gte("discovered_at", cutoff.toISOString());
+  }
+
+  if (
+    typeof postedWithinDays === "number" &&
+    postedWithinDays > 0 &&
+    Number.isFinite(postedWithinDays)
+  ) {
+    const postedCutoff = new Date();
+    postedCutoff.setUTCDate(postedCutoff.getUTCDate() - postedWithinDays);
+    query = query.gte("posted_at", postedCutoff.toISOString());
   }
 
   if (q) {

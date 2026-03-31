@@ -33,7 +33,7 @@ sources ──< scans ──< scan_results >── jobs >── companies
 |---|---|---|---|
 | `id` | uuid | PK, default gen_random_uuid() | |
 | `name` | text | NOT NULL | Human label (e.g., "Lever - Ramp") |
-| `type` | text | NOT NULL | lever, greenhouse, ashby, manual |
+| `type` | text | NOT NULL | lever, greenhouse, ashby, rss, manual |
 | `config` | jsonb | NOT NULL, default '{}' | API base URL, company slug, filters |
 | `is_active` | boolean | NOT NULL, default true | |
 | `scan_frequency_minutes` | integer | NOT NULL, default 360 | How often to scan (default 6h) |

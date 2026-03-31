@@ -26,6 +26,17 @@ function parseDiscoveredWithinDays(
   return 14;
 }
 
+/** Default no ATS posted filter; `all` / absent = no cutoff. */
+function parsePostedWithinDays(
+  raw: string | string[] | undefined,
+): number | null {
+  const r = toStr(raw).trim().toLowerCase();
+  if (!r || r === "all" || r === "0") return null;
+  const n = Number.parseInt(r, 10);
+  if (n === 7 || n === 14 || n === 30) return n;
+  return null;
+}
+
 export default async function DashboardPage(props: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
@@ -37,12 +48,14 @@ export default async function DashboardPage(props: {
   const sortBy = toStr(sp.sortBy).trim() as "score" | "date" | "title" | "";
   const isRemote = toStr(sp.isRemote).trim();
   const discoveredWithinDays = parseDiscoveredWithinDays(sp.recent);
+  const postedWithinDays = parsePostedWithinDays(sp.posted);
 
   const result = await getDashboardJobs({
     q: q || undefined,
     status: status && status !== "all" ? status : undefined,
     minScore: minScore ?? undefined,
     discoveredWithinDays,
+    postedWithinDays,
     sortBy: (sortBy as "score" | "date" | "title") || "score",
     sortDir: "desc",
     isRemote: isRemote === "true" ? true : undefined,
@@ -60,6 +73,12 @@ export default async function DashboardPage(props: {
         ? recentParam
         : "14";
 
+  const postedParam = toStr(sp.posted).trim();
+  const postedForm =
+    postedParam === "7" || postedParam === "14" || postedParam === "30"
+      ? postedParam
+      : "all";
+
   const filters = {
     q: q || undefined,
     status: status || undefined,
@@ -67,6 +86,7 @@ export default async function DashboardPage(props: {
     sortBy: sortBy || undefined,
     isRemote: isRemote || undefined,
     recent: recentForm,
+    posted: postedForm,
   };
 
   return (
@@ -79,12 +99,19 @@ export default async function DashboardPage(props: {
             {discoveredWithinDays != null ? (
               <>
                 {" "}
-                · Jobs first ingested in the last{" "}
-                <span className="text-zinc-400">{discoveredWithinDays} days</span>
+                · Ingested in the last{" "}
+                <span className="text-zinc-400">{discoveredWithinDays}d</span>
               </>
             ) : (
               <> · All ingested jobs</>
             )}
+            {postedWithinDays != null ? (
+              <>
+                {" "}
+                · ATS posted in the last{" "}
+                <span className="text-zinc-400">{postedWithinDays}d</span>
+              </>
+            ) : null}
           </p>
         </div>
       </div>

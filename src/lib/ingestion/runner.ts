@@ -8,6 +8,7 @@ import { fetchLeverPostings } from "@/lib/ingestion/fetchers/lever";
 import {
   fetchRemoteOKJobs,
   fetchRemotiveJobs,
+  fetchRssFeedJobs,
 } from "@/lib/ingestion/fetchers/rss";
 import {
   normalizeAshbyJob,
@@ -334,10 +335,25 @@ async function scanOneSource(
         : RSS_GTM_KEYWORDS;
       const provider =
         typeof config.provider === "string" ? config.provider.trim() : "remoteok";
-      const rssJobs =
-        provider === "remotive"
-          ? await fetchRemotiveJobs(keywords)
-          : await fetchRemoteOKJobs(keywords);
+      let rssJobs;
+      if (provider === "remotive") {
+        rssJobs = await fetchRemotiveJobs(keywords);
+      } else if (provider === "rss_feed" || provider === "feed") {
+        const feedUrl =
+          typeof config.feed_url === "string" ? config.feed_url.trim() : "";
+        if (!feedUrl) {
+          throw new Error(
+            'RSS source with provider "rss_feed" must set config.feed_url.',
+          );
+        }
+        const defaultCompany =
+          typeof config.company_name === "string" && config.company_name.trim()
+            ? config.company_name.trim()
+            : "RSS feed";
+        rssJobs = await fetchRssFeedJobs(feedUrl, keywords, defaultCompany);
+      } else {
+        rssJobs = await fetchRemoteOKJobs(keywords);
+      }
       norms = rssJobs.map((j) => normalizeRssJob(j));
     } else {
       throw new Error(`Unsupported source type: ${source.type}`);
